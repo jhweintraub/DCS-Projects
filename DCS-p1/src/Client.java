@@ -22,7 +22,7 @@ public class Client {
 
         while(true) {
         	//once connected to the server -- initiate the commands
-            System.out.print(">");
+            System.out.print("sftp> ");
             String command = keyboard.readLine();
 
             out.println(command);
