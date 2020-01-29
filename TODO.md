@@ -1,4 +1,4 @@
- #TODO LIST
+# TODO LIST
   * Parser for the command line args
   * get
   * put
@@ -7,14 +7,14 @@
   * delete
   * multithreading
 
-##Josh
+## Josh
   * Get
   * mkdir
 
-##Tyler
+## Tyler
   * cd
   * multithreading
 
-##Kingsley
+## Kingsley
   * put
   * delete
