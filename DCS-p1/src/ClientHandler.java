@@ -28,7 +28,9 @@ public class ClientHandler implements Runnable {
 				// asynchronously
 				out.printf("sftp> ");
 				String request = in.readLine();
-				switch (request) {
+				char [] requestAsCharArr = request.toCharArray();
+
+				switch (wordParser(requestAsCharArr, 1)) {
 				case "pwd":
 					run_pwd();
 					break;
@@ -69,10 +71,14 @@ public class ClientHandler implements Runnable {
 	public void run_ls() {
 		File dir = new File(System.getProperty("user.dir"));
 		File[] childs = dir.listFiles();
-		for(File child: childs){
-		    out.println(child.getName());
-		}//for
-		out.println("..\n.");
+		try{
+			for(File child: childs){
+				out.println(child.getName());
+			}//for
+		} catch{ (NullPointerException e){
+			out.printf("\n")
+		}
+		out.printf("..\n.");
 	}//run_ls
 
 	public void run_pwd() {
@@ -99,4 +105,22 @@ public class ClientHandler implements Runnable {
 
 	}
 
+	//returns a given String from a char array
+	private static String wordParser(char [] c, int wordNumber){
+		String s = "";
+		int spaceCount = 0;
+
+		if(wordNumber == 1){
+			for(int i = 0; i < c.length && c[i] != ' '; i++){
+				s = s+c[i];
+			}
+		} else {
+			for(int i = 0; spaceCount != wordNumber; i++){
+				if(c[i] == ' ') spaceCount++;
+				else if(spaceCount == wordNumber - 1) s = s + c[i];
+			}
+		}
+
+		return s;
+	}
 }
