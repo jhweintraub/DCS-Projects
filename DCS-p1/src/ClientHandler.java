@@ -12,7 +12,7 @@ public class ClientHandler implements Runnable {
 	private PrintWriter out;
 
 	private static String currDirectory = "/root/";
-	private static String lastDirectory;
+	private static String lastDirectory = null;
 
 	public ClientHandler(Socket clientSocket) throws IOException {
 		this.client = clientSocket;
@@ -42,8 +42,10 @@ public class ClientHandler implements Runnable {
 				case "put":
 					break;
 				case "mkdir":
+					//Sys Class
 					break;
 				case "delete":
+					//Sys Call
 					break;
 				case "quit":
 					in.close();
@@ -65,7 +67,7 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void run_ls() {
-		File dir = new File(System.getProperty("user.dir") + "/src" + currDirectory);
+		File dir = new File(System.getProperty("user.dir"));
 		File[] childs = dir.listFiles();
 		for(File child: childs){
 		    out.println(child.getName());
@@ -86,7 +88,7 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void run_delete(String directory) {
-
+		
 	}
 
 	public void run_cd(String directory) {
