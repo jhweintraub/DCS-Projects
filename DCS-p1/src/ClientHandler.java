@@ -104,7 +104,9 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void run_delete(String file) {
-		File pathName = currDirectory+file;
+		out.println("in delete");
+		File pathName = new File(currDirectory+file);
+
 	}
 
 	public void run_cd(String directory) {
@@ -125,9 +127,13 @@ public class ClientHandler implements Runnable {
 				s = s+c[i];
 			}
 		} else {
-			for(int i = 0; spaceCount != wordNumber; i++){
-				if(c[i] == ' ') spaceCount++;
-				else if(spaceCount == wordNumber - 1) s = s + c[i];
+			try{
+				for(int i = 0; spaceCount != wordNumber; i++){
+					if(c[i] == ' ') spaceCount++;
+					else if(spaceCount == wordNumber - 1) s = s + c[i];
+				}
+			} catch(ArrayIndexOutOfBoundsException e){
+				//just continue to let s be output
 			}
 		}
 
