@@ -1,1 +1,1 @@
-Members: Josh Weintraub, Tyler Kitchens, Kigsley Sitzman
+Members: Josh Weintraub, Tyler Kitchens, Kingsley Sitzmann

@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DateServer {
-    public static final String [] options = {"ls", "print", "mkdir", "cd"};
     private static final int PORT = 9090;
 
     //list of clients being connected.
@@ -22,21 +21,22 @@ public class DateServer {
 
     public static void main(String[] args) throws IOException {
         ServerSocket listener = new ServerSocket(PORT);
-
+        System.out.println(System.getProperty("os.name"));
         while (true) {
             System.out.println("[SERVER] Waiting for client connection...");
             Socket client = listener.accept();
             System.out.println("[SERVER] Connected to client.");
-            
+
             //Create the new thread - Runnable implemented by ClientHandler
             ClientHandler clientThread = new ClientHandler(client);
             clients.add(clientThread);
+            System.out.println(clients.size());
 
             //execute the Runnable we just created - execute calls the ClientHandler's overrode run() method
             pool.execute(clientThread);
             
             //Print the number of connected clients - when the socket is closed it gets removed from the ArrayList
-            System.out.println(clients.size());
+
         }
     }
 }

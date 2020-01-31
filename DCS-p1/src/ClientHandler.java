@@ -1,15 +1,9 @@
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.net.Socket;
 
 public class ClientHandler implements Runnable {
@@ -17,13 +11,20 @@ public class ClientHandler implements Runnable {
 	private BufferedReader in;
 	private PrintWriter out;
 
-	private static String currDirectory = "/root/";
+	private static String currDirectory;
 	private static String lastDirectory = null;
 
 	public ClientHandler(Socket clientSocket) throws IOException {
 		this.client = clientSocket;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
+
+		//changes format of directory depending on if server is running windows or linux
+		if(wordParser(System.getProperty("os.name").toCharArray(), 1).contentEquals("Windows")) {
+			currDirectory = System.getProperty("user.dir") + "\\DCS-p1\\root\\";
+		} else{
+			currDirectory = System.getProperty("user.dir") + "/DCS-p1/root/";
+		}
 	}
 
 	@Override
@@ -32,12 +33,10 @@ public class ClientHandler implements Runnable {
 			while (true) {
 				// So idk why but if you use print() instead of printf() it will execute
 				// asynchronously
-				out.printf("sftp> ");
 				String request = in.readLine();
 				char [] requestAsCharArr = request.toCharArray();
-				
+
 				switch (wordParser(requestAsCharArr, 1)) {
-				
 				case "pwd":
 					run_pwd();
 					break;
@@ -47,20 +46,21 @@ public class ClientHandler implements Runnable {
 				case "cd":
 					break;
 				case "get":
-					run_get(wordParser(requestAsCharArr, 2));
 					break;
 				case "put":
 					break;
 				case "mkdir":
-					run_mkdir(wordParser(requestAsCharArr, 2));
 					//Sys Class
 					break;
 				case "delete":
-					//Sys Call
+					run_delete(wordParser(requestAsCharArr, 2));
 					break;
 				case "quit":
 					in.close();
 					client.close();
+					break;
+				default:
+					out.println("This command is invalid.");
 					break;
 				}// switch
 			} // while
@@ -78,14 +78,16 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void run_ls() {
-		File dir = new File(System.getProperty("user.dir"));
+		String s = null;
+		File dir = new File(System.getProperty("user.dir")+"\\DCS-p1\\root");
 		File[] childs = dir.listFiles();
 		try{
 			for(File child: childs){
-				out.println(child.getName());
+				s = child.getName() + ' ';
 			}//for
-		} catch (NullPointerException e){
-			out.printf("\n");
+			out.println(s);
+		} catch (NullPointerException e) {
+			out.println("\n");
 		}
 	}//run_ls
 
@@ -94,38 +96,15 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void run_get(String directory) {
-		File fileToGet = new File("root/" + directory);
-		File filetoDownload = new File(directory);
-		String readLine = "";
-		
-		try {
-			Process proc = Runtime.getRuntime().exec("touch " + directory);
-		
-			BufferedReader br = new BufferedReader(new FileReader(fileToGet));
-			BufferedWriter bw = new BufferedWriter(new FileWriter(filetoDownload));
-			
-			String st; 
-			  while ((st = br.readLine()) != null) {
-			    out.println(st); 
-			    bw.write(st + '\n');
-			  } 
-			  
-			  bw.close();
-			  
-			return;
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		 return; 
-	}//run_get
+
+	}
 
 	public void run_put(String directory) {
 
 	}
 
-	public void run_delete(String directory) {
-		
+	public void run_delete(String file) {
+		File pathName = currDirectory+file;
 	}
 
 	public void run_cd(String directory) {
@@ -133,13 +112,7 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void run_mkdir(String directory) {
-		System.out.println(directory + '\n');
-		try {
-			Process process = Runtime.getRuntime().exec("mkdir " + directory);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 	}
 
 	//returns a given String from a char array
