@@ -11,13 +11,20 @@ public class ClientHandler implements Runnable {
 	private BufferedReader in;
 	private PrintWriter out;
 
-	private static String currDirectory = "/root/";
+	private static String currDirectory;
 	private static String lastDirectory = null;
 
 	public ClientHandler(Socket clientSocket) throws IOException {
 		this.client = clientSocket;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
+
+		//changes format of directory depending on if server is running windows or linux
+		if(wordParser(System.getProperty("os.name").toCharArray(), 1).contentEquals("Windows")) {
+			currDirectory = System.getProperty("user.dir") + "\\DCS-p1\\root\\";
+		} else{
+			currDirectory = System.getProperty("user.dir") + "/DCS-p1/root/";
+		}
 	}
 
 	@Override
@@ -26,7 +33,6 @@ public class ClientHandler implements Runnable {
 			while (true) {
 				// So idk why but if you use print() instead of printf() it will execute
 				// asynchronously
-				out.printf("sftp> ");
 				String request = in.readLine();
 				char [] requestAsCharArr = request.toCharArray();
 
@@ -47,11 +53,14 @@ public class ClientHandler implements Runnable {
 					//Sys Class
 					break;
 				case "delete":
-					//Sys Call
+					run_delete(wordParser(requestAsCharArr, 2));
 					break;
 				case "quit":
 					in.close();
 					client.close();
+					break;
+				default:
+					out.println("This command is invalid.");
 					break;
 				}// switch
 			} // while
@@ -69,16 +78,17 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void run_ls() {
-		File dir = new File(System.getProperty("user.dir"));
+		String s = null;
+		File dir = new File(System.getProperty("user.dir")+"\\DCS-p1\\root");
 		File[] childs = dir.listFiles();
 		try{
 			for(File child: childs){
-				out.println(child.getName());
+				s = child.getName() + ' ';
 			}//for
-		} catch{ (NullPointerException e){
-			out.printf("\n")
+			out.println(s);
+		} catch (NullPointerException e) {
+			out.println("\n");
 		}
-		out.printf("..\n.");
 	}//run_ls
 
 	public void run_pwd() {
@@ -93,8 +103,8 @@ public class ClientHandler implements Runnable {
 
 	}
 
-	public void run_delete(String directory) {
-		
+	public void run_delete(String file) {
+		File pathName = currDirectory+file;
 	}
 
 	public void run_cd(String directory) {

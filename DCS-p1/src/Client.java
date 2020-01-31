@@ -20,16 +20,18 @@ public class Client {
         BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
+
         while(true) {
-        	//once connected to the server -- initiate the commands
             System.out.print("sftp> ");
+
+            //once connected to the server -- initiate the commands
             String command = keyboard.readLine();
 
             out.println(command);
             if(command.equals("close")) break;
 
             String serverResponse = input.readLine();
-            JOptionPane.showMessageDialog(null, serverResponse);
+            System.out.println(serverResponse);
         }
 
         socket.close(); //close the socket when you're done with it. 
