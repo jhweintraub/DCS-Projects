@@ -29,9 +29,18 @@ public class Client {
 
             out.println(command);
             if(command.equals("close")) break;
-
-            String serverResponse = input.readLine();
-            System.out.println(serverResponse);
+            
+            if(command.substring(0, 3).equals("get")) {
+            	System.out.println("this is a test");
+            	String serverResponse = input.readLine();
+                System.out.println(serverResponse);
+            }
+            
+            else {
+            	  String serverResponse = input.readLine();
+                  System.out.println(serverResponse);
+            }
+          
         }
 
         socket.close(); //close the socket when you're done with it. 
