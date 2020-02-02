@@ -1,6 +1,8 @@
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,6 +10,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.Buffer;
+import java.nio.file.Files;
 
 public class Client {
 
@@ -58,6 +61,25 @@ public class Client {
             	os.close();
             }//if get command
             
+            else if (command.substring(0, 3).equals("put")){
+            	String filename = wordParser(command.toCharArray(), 2);//determine the new file name
+            	DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+
+            	//determine the file
+        		File file = new File(filename);
+        		byte[] fileContent;
+        		
+        		try {
+        			//convert it to a byte array
+        			fileContent = Files.readAllBytes(file.toPath());
+        			dOut.writeInt(fileContent.length); //first write the length of the file
+        			dOut.write(fileContent);//write the file contents itself
+        		} catch (IOException e1) {
+        			// TODO Auto-generated catch block
+        			e1.printStackTrace();
+        		}//catch
+            }//else if
+           
             
             else {
             	  String serverResponse = input.readLine();
