@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,7 @@ public class ClientHandler implements Runnable {
 	private Socket client;
 	private BufferedReader in;
 	private PrintWriter out;
+	private DataOutputStream dOut;
 
 	private static String currDirectory;
 	private static String lastDirectory = null;
@@ -20,6 +22,8 @@ public class ClientHandler implements Runnable {
 		this.client = clientSocket;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
+		this.dOut = new DataOutputStream(client.getOutputStream());
+
 
 		/*//changes format of directory depending on if server is running windows or linux, on a side note why do whe have this
 			if(wordParser(System.getProperty("os.name").toCharArray(), 1).contentEquals("Windows")) {
@@ -40,11 +44,9 @@ public class ClientHandler implements Runnable {
 	public void run() {
 		try {
 			while (true) {
-				// So idk why but if you use print() instead of printf() it will execute
-				// asynchronously
 				String request = in.readLine();
 				char [] requestAsCharArr = request.toCharArray();
-
+				
 				switch (wordParser(requestAsCharArr, 1)) {
 				case "pwd":
 					run_pwd();
@@ -56,6 +58,7 @@ public class ClientHandler implements Runnable {
 					run_cd(request);
 					break;
 				case "get":
+					run_get(wordParser(requestAsCharArr, 2));
 					break;
 				case "put":
 					break;
@@ -115,8 +118,23 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void run_get(String directory) {
-
-	}
+	
+		//determine the file
+		File file = new File(directory);
+		byte[] fileContent;
+		
+		try {
+			//convert it to a byte array
+			fileContent = Files.readAllBytes(file.toPath());
+			dOut.writeInt(fileContent.length); //first write the length of the file
+			dOut.write(fileContent);//write the file contents itself
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}//catch
+	}//run_get()
+	
+	
 
 	public void run_put(String directory) {
 

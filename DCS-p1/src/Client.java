@@ -1,7 +1,10 @@
 import javax.swing.*;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.Buffer;
@@ -10,6 +13,7 @@ public class Client {
 
     public static final String SERVER_IP = "127.0.0.1";
     public static final int SERVER_PORT = 9090;
+    public static byte[] message;
 
     public static void main(String[] args) throws IOException{
     	
@@ -18,8 +22,11 @@ public class Client {
 
         BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
+        
+        //This is what writes to the socket - you use out.print() and whats inside the method is what gets written to the socket
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-
+        
+       
 
         while(true) {
             System.out.print("sftp> ");
@@ -28,22 +35,62 @@ public class Client {
             String command = keyboard.readLine();
 
             out.println(command);
+            
             if(command.equals("close")) break;
             
             if(command.substring(0, 3).equals("get")) {
-            	System.out.println("this is a test");
-            	String serverResponse = input.readLine();
-                System.out.println(serverResponse);
-            }
+            	
+            	//The Input Stream is where you read data incoming from the socket
+            	DataInputStream dIn = new DataInputStream(socket.getInputStream());
+            	String filename = wordParser(command.toCharArray(), 2);//determine the new file name
+            	
+            	Process proc = Runtime.getRuntime().exec("touch " + filename);//create the file
+            	
+                OutputStream os = new FileOutputStream(filename);
+            	
+            	//read in the size of the byte array
+            	int length = dIn.readInt();                    // read length of incoming message
+            	if(length>0) {
+            	    message = new byte[length];
+            	    dIn.readFully(message, 0, message.length); // read the message
+            	}//if
+            	os.write(message);//write the byte array to the file
+            	os.close();
+            }//if get command
+            
             
             else {
             	  String serverResponse = input.readLine();
                   System.out.println(serverResponse);
-            }
-          
-        }
+            }//else
+         
+        }//while
 
         socket.close(); //close the socket when you're done with it. 
         System.exit(0);
-    }
+    }//main()
+    
+    
+    
+    private static String wordParser(char [] c, int wordNumber){
+		String s = "";
+		int spaceCount = 0;
+
+		if(wordNumber == 1){
+			for(int i = 0; i < c.length && c[i] != ' '; i++){
+				s = s+c[i];
+			}
+		} else {
+			try{
+				for(int i = 0; spaceCount != wordNumber; i++){
+					if(c[i] == ' ') spaceCount++;
+					else if(spaceCount == wordNumber - 1) s = s + c[i];
+				}
+			} catch(ArrayIndexOutOfBoundsException e){
+				//just continue to let s be output
+			}
+		}
+
+		return s;
+	}
 }
