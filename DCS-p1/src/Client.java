@@ -14,14 +14,17 @@ import java.nio.file.Files;
 
 public class Client {
 
-	public static final String SERVER_IP = "127.0.0.1";
-	public static final int SERVER_PORT = 9090;
+	public static String SERVER_IP;
+	public static int SERVER_PORT;
 	public static byte[] message;
 
 	public static void main(String[] args) throws IOException {
 
 		// Create a new client-side socket to connect to the server and the specified
 		// port
+		SERVER_IP = args[0];
+		SERVER_PORT = Integer.parseInt(args[1]);
+		
 		Socket socket = new Socket(SERVER_IP, SERVER_PORT);
 
 		BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -32,14 +35,14 @@ public class Client {
 		PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
 		while (true) {
-			System.out.print("sftp> ");
+			System.out.print("myftp> ");
 
 			// once connected to the server -- initiate the commands
 			String command = keyboard.readLine();
 
 			out.println(command);
 
-			if (command.equals("close"))
+			if (command.equals("quit"))
 				break;
 
 			if (command.equals("ls") || command.equals("cd")) {

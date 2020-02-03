@@ -28,14 +28,7 @@ public class ClientHandler implements Runnable {
 		this.dOut = new DataOutputStream(client.getOutputStream());
 
 
-		/*//changes format of directory depending on if server is running windows or linux, on a side note why do whe have this
-			if(wordParser(System.getProperty("os.name").toCharArray(), 1).contentEquals("Windows")) {
-				currDirectory = System.getProperty("user.dir") ;
-			} else{
-				currDirectory = System.getProperty("user.dir");
-			}
-		 */
-
+		
 		//Should be as simple as this
 		currDirectory = System.getProperty("user.dir");
 
@@ -103,7 +96,6 @@ public class ClientHandler implements Runnable {
 
 		try{
 			for(File child: childs){
-
 				//Changed this to += so now it works, no hidden files in ls
 				if(child.getName().charAt(0) != '.')
 					s += child.getName() + ' ';
@@ -167,11 +159,10 @@ public class ClientHandler implements Runnable {
 
 	}
 
-	public void run_delete(String file) {
-		out.println("in delete");
-		
+	public void run_delete(String file) {		
 		try {
 			Process proc = Runtime.getRuntime().exec("rm " + currDirectory + '/' + file);
+			out.println();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -180,32 +171,32 @@ public class ClientHandler implements Runnable {
 
 	public void run_cd(String directory) {
 		//have to add a space to the end to get it to split easier
-		directory += " ";
-		String[] commandWords = directory.split(" ");
+				directory += " ";
+				String[] commandWords = directory.split(" ");
 
-		//User wants to go back to home
-		if(commandWords.length == 1){
-			currDirectory = homeDir;
-			//need these outs to make new prompt
-			out.println();
-		}
-		
-		else if(commandWords[1].equals("..")){
-			parentDir();
-//			out.println();
-		} 
-		else{
-			if(isValidPath(commandWords[1])){
-				if(commandWords[1].charAt(0) == '\\'){
-					currDirectory = commandWords[1];
-				}else{
-					currDirectory += ('/' + commandWords[1]);
+				//User wants to go back to home
+				if(commandWords.length == 1){
+					currDirectory = homeDir;
+					//need these outs to make new prompt
+					out.println();
 				}
+				
+				else if(commandWords[1].equals("..")){
+					parentDir();
 				out.println();
-			}else{
-				out.println("cd: " + commandWords[1] + " No such file or directory");
-			}
-		}
+				} 
+				else{
+					if(isValidPath(commandWords[1])){
+						if(commandWords[1].charAt(0) == '/'){
+							currDirectory = commandWords[1];
+						}else{
+							currDirectory += ('/' + commandWords[1]);
+						}
+						out.println();
+					}else{
+						out.println("cd: " + commandWords[1] + " No such file or directory");
+					}
+				}
 	}
 
 	public void run_mkdir(String directory) {
@@ -245,11 +236,11 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void parentDir(){
-		String[] dirArr = currDirectory.split("\\\\");
+		String[] dirArr = currDirectory.split("/");
 		String temp = "";
 		//Loop till last item and do not add it
 		for(int i = 0; i< dirArr.length -1; i++){
-			temp+= dirArr[i] + "\\";
+			temp+= dirArr[i] + "/";
 		}
 
 		currDirectory = temp;
@@ -257,7 +248,7 @@ public class ClientHandler implements Runnable {
 
 	public boolean isValidPath(String path){
 		//its an absolute path, check validity
-		if(path.charAt(0) == '\\'){
+		if(path.charAt(0) == '/'){
 			return new File(path).exists();
 		}else{
 			//looking for folder inside this folder

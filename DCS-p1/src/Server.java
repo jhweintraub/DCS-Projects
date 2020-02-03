@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class DateServer {
-    private static final int PORT = 9090;
+public class Server {
+    private static int PORT = 0;
 
     //list of clients being connected.
     private static ArrayList<ClientHandler> clients = new ArrayList<>();
@@ -20,6 +20,7 @@ public class DateServer {
     private static ExecutorService pool = Executors.newFixedThreadPool(4);
 
     public static void main(String[] args) throws IOException {
+    	PORT = Integer.parseInt(args[0]);
         ServerSocket listener = new ServerSocket(PORT);
         System.out.println(System.getProperty("os.name"));
         while (true) {
