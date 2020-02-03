@@ -113,7 +113,7 @@ public class ClientHandler implements Runnable {
 				out.println(s);
 			return s;
 		} catch (NullPointerException e) {
-			out.println("You Fucked up\n");
+			out.println("Error\n");
 			return s;
 		}
 	}//run_ls
@@ -145,7 +145,7 @@ public class ClientHandler implements Runnable {
 		try {
 			DataInputStream dIn = new DataInputStream(client.getInputStream());
 	    	
-	    	Process proc = Runtime.getRuntime().exec("touch " + directory);//create the file
+	    	Process proc = Runtime.getRuntime().exec("touch " + (currDirectory + '/' + directory));//create the file
 	    	
 	        OutputStream os = new FileOutputStream(directory);
 	       byte[] message = null;
@@ -169,8 +169,13 @@ public class ClientHandler implements Runnable {
 
 	public void run_delete(String file) {
 		out.println("in delete");
-		File pathName = new File(currDirectory+file);
-
+		
+		try {
+			Process proc = Runtime.getRuntime().exec("rm " + currDirectory + '/' + file);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void run_cd(String directory) {
@@ -183,15 +188,18 @@ public class ClientHandler implements Runnable {
 			currDirectory = homeDir;
 			//need these outs to make new prompt
 			out.println();
-		}else if(commandWords[1].equals("..")){
+		}
+		
+		else if(commandWords[1].equals("..")){
 			parentDir();
-			out.println();
-		}else{
+//			out.println();
+		} 
+		else{
 			if(isValidPath(commandWords[1])){
 				if(commandWords[1].charAt(0) == '\\'){
 					currDirectory = commandWords[1];
 				}else{
-					currDirectory += commandWords[1];
+					currDirectory += ('/' + commandWords[1]);
 				}
 				out.println();
 			}else{
@@ -202,15 +210,19 @@ public class ClientHandler implements Runnable {
 
 	public void run_mkdir(String directory) {
 		try {
-			Runtime.getRuntime().exec("mkdir " + directory);
+			Process proc = Runtime.getRuntime().exec("mkdir " + (currDirectory + '/' + directory));
+			return;
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			out.println("Directory Created");
 		}
-
 	}
 
 	//returns a given String from a char array
 	private static String wordParser(char [] c, int wordNumber){
+		if (c[0] == 'l' && c[1] == 's') return "ls";
+		
 		String s = "";
 		int spaceCount = 0;
 
