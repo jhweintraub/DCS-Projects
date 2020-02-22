@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.nio.Buffer;
 import java.nio.file.Files;
@@ -17,18 +18,29 @@ public class Client {
 	public static String SERVER_IP;
 	public static int SERVER_PORT;
 	public static byte[] message;
+    private static String localDir;
 
-	public static void main(String[] args) throws IOException {
-
+    public static void main(String[] args) throws IOException{
 		// Create a new client-side socket to connect to the server and the specified
 		// port
 		SERVER_IP = args[0];
 		SERVER_PORT = Integer.parseInt(args[1]);
-		
-		Socket socket = new Socket(SERVER_IP, SERVER_PORT);
+
+    	//Create a new client-side socket to connect to the server and the specified port
+        Socket socket = new Socket(SERVER_IP, SERVER_PORT);
 
 		BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
+        //changes format of directory depending on if server is running windows or linux
+        if(System.getProperty("os.name").contains("Windows")) {
+            localDir = System.getProperty("user.dir")+"\\local_directory\\";
+        } else{
+            localDir = System.getProperty("user.dir") + "/local_directory/";
+        }
+
+        File path = new File(localDir);
+        path.mkdir();
+        System.out.println("Local Directory: "+localDir);
 
 		// This is what writes to the socket - you use out.print() and whats inside the
 		// method is what gets written to the socket
@@ -123,4 +135,5 @@ public class Client {
 
 		return s;
 	}
-}
+
+}//Client

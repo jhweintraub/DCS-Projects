@@ -1,10 +1,10 @@
 # TODO LIST
-  * Parser for the command line args
+  * ~~Parser for the command line args~~ 
   * get
   * put
   * cd
   * mkdir
-  * delete
+  * ~~delete~~ 
   * multithreading
 
 ## Josh
@@ -17,4 +17,4 @@
 
 ## Kingsley
   * put
-  * delete
+  * ~~delete~~

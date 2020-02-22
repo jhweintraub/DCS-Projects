@@ -10,6 +10,11 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.io.*;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class ClientHandler implements Runnable {
 	private Socket client;
@@ -26,14 +31,22 @@ public class ClientHandler implements Runnable {
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
 		this.dOut = new DataOutputStream(client.getOutputStream());
-
-
 		
 		//Should be as simple as this
 		currDirectory = System.getProperty("user.dir");
 
 		//sets the home directory incase you do not enter an argument for CD
 		homeDir = System.getProperty("user.dir");
+
+		//changes format of directory depending on if server is running windows or linux
+		if(System.getProperty("os.name").contains("Windows")) {
+			currDirectory = System.getProperty("user.dir") + "\\DCS-p1\\root\\";
+		} else{
+			currDirectory = System.getProperty("user.dir") + "/DCS-p1/root/";
+		}
+
+		File rootDir = new File(currDirectory);
+		rootDir.mkdir();
 	}
 
 	@Override
@@ -131,7 +144,6 @@ public class ClientHandler implements Runnable {
 		}//catch
 	}//run_get()
 	
-	
 
 	public void run_put(String directory) {
 		try {
@@ -159,15 +171,17 @@ public class ClientHandler implements Runnable {
 
 	}
 
-	public void run_delete(String file) {		
-		try {
-			Process proc = Runtime.getRuntime().exec("rm " + currDirectory + '/' + file);
-			out.println();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+	public void run_delete(String file) {
+		File pathName = new File(currDirectory+file);
+
+		if(pathName.exists()){
+			pathName.delete();
+			out.println(pathName+" has been deleted.");
+		} else{
+			out.println("This file does not exist.");
 		}
-	}
+	}//run_delete
 
 	public void run_cd(String directory) {
 		//have to add a space to the end to get it to split easier
@@ -211,9 +225,7 @@ public class ClientHandler implements Runnable {
 	}
 
 	//returns a given String from a char array
-	private static String wordParser(char [] c, int wordNumber){
-		if (c[0] == 'l' && c[1] == 's') return "ls";
-		
+	public static String wordParser(char [] c, int wordNumber){
 		String s = "";
 		int spaceCount = 0;
 
@@ -257,3 +269,4 @@ public class ClientHandler implements Runnable {
 
 	}
 }
+
