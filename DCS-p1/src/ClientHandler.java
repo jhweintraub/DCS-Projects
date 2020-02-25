@@ -35,7 +35,7 @@ public class ClientHandler implements Runnable {
 		//Should be as simple as this
 		currDirectory = System.getProperty("user.dir");
 
-		//sets the home directory incase you do not enter an argument for CD
+		//sets the home directory in case you do not enter an argument for CD
 		homeDir = System.getProperty("user.dir");
 
 		//changes format of directory depending on if server is running windows or linux
@@ -130,7 +130,7 @@ public class ClientHandler implements Runnable {
 	public void run_get(String directory) {
 	
 		//determine the file
-		File file = new File(directory);
+		File file = new File(currDirectory + '/' + directory);
 		byte[] fileContent;
 		
 		try {
@@ -151,7 +151,7 @@ public class ClientHandler implements Runnable {
 	    	
 	    	Process proc = Runtime.getRuntime().exec("touch " + (currDirectory + '/' + directory));//create the file
 	    	
-	        OutputStream os = new FileOutputStream(directory);
+	        OutputStream os = new FileOutputStream(currDirectory + '/' + directory);
 	       byte[] message = null;
 
 	    

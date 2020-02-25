@@ -95,7 +95,7 @@ public class Client {
 					fileContent = Files.readAllBytes(file.toPath());
 					dOut.writeInt(fileContent.length); // first write the length of the file
 					dOut.write(fileContent);// write the file contents itself
-				} catch (IOException e1) {
+				} catch (IOException e1) {	
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				} // catch
