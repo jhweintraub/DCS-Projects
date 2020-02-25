@@ -10,11 +10,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.io.*;
-import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class ClientHandler implements Runnable {
 	private Socket client;
@@ -31,22 +26,14 @@ public class ClientHandler implements Runnable {
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
 		this.dOut = new DataOutputStream(client.getOutputStream());
+
+
 		
 		//Should be as simple as this
 		currDirectory = System.getProperty("user.dir");
 
 		//sets the home directory in case you do not enter an argument for CD
 		homeDir = System.getProperty("user.dir");
-
-		//changes format of directory depending on if server is running windows or linux
-		if(System.getProperty("os.name").contains("Windows")) {
-			currDirectory = System.getProperty("user.dir") + "\\DCS-p1\\root\\";
-		} else{
-			currDirectory = System.getProperty("user.dir") + "/DCS-p1/root/";
-		}
-
-		File rootDir = new File(currDirectory);
-		rootDir.mkdir();
 	}
 
 	@Override
@@ -55,6 +42,10 @@ public class ClientHandler implements Runnable {
 			while (true) {
 				String request = in.readLine();
 				char [] requestAsCharArr = request.toCharArray();
+				
+				//Return the Process ID to the User
+				out.println(Thread.currentThread().getId());
+
 				
 				switch (wordParser(requestAsCharArr, 1)) {
 				case "pwd":
@@ -100,7 +91,7 @@ public class ClientHandler implements Runnable {
 			}
 		} // finally
 	}
-
+	
 	public String run_ls(boolean print) {
 		String s = "";
 		//Why do we have to make that folder. This allows it to work no matter where the program is 
@@ -130,7 +121,11 @@ public class ClientHandler implements Runnable {
 	public void run_get(String directory) {
 	
 		//determine the file
-		File file = new File(currDirectory + '/' + directory);
+		String fileName = currDirectory + '/' + directory;
+		File file = new File(fileName);
+		
+		//Add to the Job List
+		Server.clients.add(new Job(fileName, Thread.currentThread().getId()));
 		byte[] fileContent;
 		
 		try {
@@ -144,13 +139,17 @@ public class ClientHandler implements Runnable {
 		}//catch
 	}//run_get()
 	
+	
 
 	public void run_put(String directory) {
 		try {
 			DataInputStream dIn = new DataInputStream(client.getInputStream());
 	    	
 	    	Process proc = Runtime.getRuntime().exec("touch " + (currDirectory + '/' + directory));//create the file
-	    	
+	    	String fileName = currDirectory + '/' + directory;
+	    	//Add to the Job List
+			Server.clients.add(new Job(fileName, Thread.currentThread().getId()));
+
 	        OutputStream os = new FileOutputStream(currDirectory + '/' + directory);
 	       byte[] message = null;
 
@@ -171,17 +170,15 @@ public class ClientHandler implements Runnable {
 
 	}
 
-
-	public void run_delete(String file) {
-		File pathName = new File(currDirectory+file);
-
-		if(pathName.exists()){
-			pathName.delete();
-			out.println(pathName+" has been deleted.");
-		} else{
-			out.println("This file does not exist.");
+	public void run_delete(String file) {		
+		try {
+			Process proc = Runtime.getRuntime().exec("rm " + currDirectory + '/' + file);
+			out.println();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-	}//run_delete
+	}
 
 	public void run_cd(String directory) {
 		//have to add a space to the end to get it to split easier
@@ -225,7 +222,9 @@ public class ClientHandler implements Runnable {
 	}
 
 	//returns a given String from a char array
-	public static String wordParser(char [] c, int wordNumber){
+	private static String wordParser(char [] c, int wordNumber){
+		if (c[0] == 'l' && c[1] == 's') return "ls";
+		
 		String s = "";
 		int spaceCount = 0;
 
@@ -269,4 +268,3 @@ public class ClientHandler implements Runnable {
 
 	}
 }
-
