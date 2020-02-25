@@ -84,7 +84,6 @@ public class Client {
 					dOut.writeInt(fileContent.length); // first write the length of the file
 					dOut.write(fileContent);// write the file contents itself
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				} // catch
 			} // else if
@@ -98,7 +97,7 @@ public class Client {
 
 		socket.close(); // close the socket when you're done with it.
 		System.exit(0);
-	}// main()
+	}//main
 
 	private static String wordParser(char[] c, int wordNumber) {
 		String s = "";
@@ -122,5 +121,6 @@ public class Client {
 		}
 
 		return s;
-	}
-}
+	}//wordParser
+
+}//Client

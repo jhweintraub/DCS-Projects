@@ -26,8 +26,6 @@ public class ClientHandler implements Runnable {
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
 		this.dOut = new DataOutputStream(client.getOutputStream());
-
-
 		
 		//Should be as simple as this
 		currDirectory = System.getProperty("user.dir");
@@ -126,7 +124,6 @@ public class ClientHandler implements Runnable {
 			dOut.writeInt(fileContent.length); //first write the length of the file
 			dOut.write(fileContent);//write the file contents itself
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}//catch
 	}//run_get()
@@ -155,19 +152,16 @@ public class ClientHandler implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-
-	}
+	}//run_put
 
 	public void run_delete(String file) {		
 		try {
 			Process proc = Runtime.getRuntime().exec("rm " + currDirectory + '/' + file);
 			out.println();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	}//run_delete
 
 	public void run_cd(String directory) {
 		//have to add a space to the end to get it to split easier
@@ -197,7 +191,7 @@ public class ClientHandler implements Runnable {
 						out.println("cd: " + commandWords[1] + " No such file or directory");
 					}
 				}
-	}
+	}//run_cd
 
 	public void run_mkdir(String directory) {
 		try {

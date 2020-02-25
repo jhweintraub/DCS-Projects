@@ -17,12 +17,13 @@ public class Server {
     private static ArrayList<ClientHandler> clients = new ArrayList<>();
     
     //Fixed size pool of threads - 4
-    private static ExecutorService pool = Executors.newFixedThreadPool(4);
+    private static ExecutorService pool = Executors.newFixedThreadPool(100);
 
     public static void main(String[] args) throws IOException {
     	PORT = Integer.parseInt(args[0]);
         ServerSocket listener = new ServerSocket(PORT);
         System.out.println(System.getProperty("os.name"));
+
         while (true) {
             System.out.println("[SERVER] Waiting for client connection...");
             Socket client = listener.accept();
@@ -35,9 +36,7 @@ public class Server {
 
             //execute the Runnable we just created - execute calls the ClientHandler's overrode run() method
             pool.execute(clientThread);
-            
-            //Print the number of connected clients - when the socket is closed it gets removed from the ArrayList
 
-        }
-    }
-}
+        }//while
+    }//main
+}//Server
