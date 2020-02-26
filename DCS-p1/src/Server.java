@@ -23,6 +23,7 @@ public class Server {
     	PORT = Integer.parseInt(args[0]);
         ServerSocket listener = new ServerSocket(PORT);
         System.out.println(System.getProperty("os.name"));
+
         while (true) {
             System.out.println("[SERVER] Waiting for client connection...");
             Socket client = listener.accept();
