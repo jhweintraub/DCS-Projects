@@ -41,6 +41,7 @@ public class ClientHandler implements Runnable {
 				String request = in.readLine();
 				char [] requestAsCharArr = request.toCharArray();
 
+				//case for if request is appended by '&' and needs new thread
 				checkNewThreadInvocation(wordParser(requestAsCharArr, 3));
 				
 				switch (wordParser(requestAsCharArr, 1)) {
@@ -93,12 +94,12 @@ public class ClientHandler implements Runnable {
 
 	private void checkNewThreadInvocation(String s){
 		if(s.equals('&')){
-			//Spin off new thread
+			//TODO - Spin off new thread
 		}
 	}//checkNewThreadInvocation
 
 	private void run_terminate(String wordParser){
-		//TODO
+		//TODO - terminate process
 	}//run_terminate
 
 	public String run_ls(boolean print) {
@@ -128,7 +129,8 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void run_get(String directory) {
-	
+		Long ID = generateCommandID();
+
 		//determine the file
 		File file = new File(directory);
 		byte[] fileContent;
@@ -142,10 +144,10 @@ public class ClientHandler implements Runnable {
 			e1.printStackTrace();
 		}//catch
 	}//run_get()
-	
-	
 
 	public void run_put(String directory) {
+		Long ID = generateCommandID();
+
 		try {
 			DataInputStream dIn = new DataInputStream(client.getInputStream());
 	    	
@@ -168,6 +170,12 @@ public class ClientHandler implements Runnable {
 			e.printStackTrace();
 		}
 	}//run_put
+
+	private Long generateCommandID(){
+		Long ID = null;
+		//TODO - generate command ID
+		return ID;
+	}//generate CommandID
 
 	public void run_delete(String file) {		
 		try {
@@ -242,7 +250,7 @@ public class ClientHandler implements Runnable {
 		}
 
 		return s;
-	}
+	}//wordParser
 
 	public void parentDir(){
 		String[] dirArr = currDirectory.split("/");

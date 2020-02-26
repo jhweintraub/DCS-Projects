@@ -21,12 +21,13 @@ public class Server {
 
     /*
     Should we have a class that handles the initial socket connections for nport and tport?
+    (as stated in project description)
      */
     
     //Fixed size pool of threads - 4
     private static ExecutorService exec_pool = Executors.newFixedThreadPool(4);
     private static ExecutorService term_pool = Executors.newFixedThreadPool(4);
-    
+
     public static void main(String[] args) throws IOException {
     	NPORT = Integer.parseInt(args[0]);
     	TPORT = Integer.parseInt(args[1]);
@@ -53,7 +54,7 @@ public class Server {
     
     //TODO - Delete Thread from Clients
     
-    public static int getIndexofThreat(Long x) {
+    public static int getIndexOfThread(Long x) {
     	for(int y = 0; y < clients.size(); y++) {
     		if (clients.get(y).getThreadID() == x) return y;
     	}
