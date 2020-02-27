@@ -24,8 +24,9 @@ public class TerminateHandler implements Runnable {
 	@Override
 	public void run() {
 		try {
+
 			Job term_job = Server.clients.get(Server.getIndexOfThread(threadId));
-			
+
 			
 		} catch (Exception e) {
 			e.printStackTrace();

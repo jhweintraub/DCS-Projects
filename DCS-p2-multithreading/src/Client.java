@@ -11,6 +11,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.Buffer;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Client {
 
@@ -18,6 +21,10 @@ public class Client {
 	public static int SERVER_EXECUTE_PORT;
 	public static int SERVER_TERMINATE_PORT;
 	public static byte[] message;
+    private static ExecutorService exec_pool = Executors.newFixedThreadPool(4);
+    public static ArrayList<ClientThreadHandler> clients = new ArrayList<>();
+
+
 
 	public static void main(String[] args) throws IOException {
 
@@ -51,71 +58,84 @@ public class Client {
 			// once connected to the server -- initiate the commands
 			String command = keyboard.readLine();
 			
-			if (command.contains("terminate")) {
-				out_term.print(command);
-				System.out.println(term_input.readLine());
-			}//if
+			//Execute in new thread if command is appended with &
+			if (command.charAt(command.length()-1) == '&' ) {
+				ClientThreadHandler clientThread = new ClientThreadHandler(exec_socket, term_socket, command);
+	            clients.add(clientThread);
+	            //execute the Runnable we just created - execute calls the ClientThreadHandler's overrode run() method
+	            exec_pool.execute(clientThread);
+			}//if appended with &
 			
-			//if not terminate command - need to write to execute socket
+			//If running in main thread
 			else {
-				//TODO----Execute in new Thread
-				out.println(command);
+				if (command.contains("terminate")) {
+					out_term.print(command);
+					System.out.println(term_input.readLine());
+				}//if
 				
-				//Show Process ID to the User
-				System.out.println("Process ID: " + exec_input.readLine());
-
-				if (command.equals("quit"))
-					break;
-
-				if (command.equals("ls") || command.equals("cd")) {
-					String serverResponse = exec_input.readLine();
-					System.out.println(serverResponse);
-				} // else
-
-				else if (command.substring(0, 3).equals("get")) {
-
-					// The Input Stream is where you read data incoming from the socket
-					DataInputStream dIn = new DataInputStream(exec_socket.getInputStream());
-					String filename = wordParser(command.toCharArray(), 2);// determine the new file name
-
-					Process proc = Runtime.getRuntime().exec("touch " + filename);// create the file
-
-					OutputStream os = new FileOutputStream(filename);
-
-					// read in the size of the byte array
-					int length = dIn.readInt(); // read length of incoming message
-					if (length > 0) {
-						message = new byte[length];
-						dIn.readFully(message, 0, message.length); // read the message
-					} // if
-					os.write(message);// write the byte array to the file
-					os.close();
-				} // if get command
-
-				else if (command.substring(0, 3).equals("put")) {
-					String filename = wordParser(command.toCharArray(), 2);// determine the new file name
-					DataOutputStream dOut = new DataOutputStream(exec_socket.getOutputStream());
-
-					// determine the file
-					File file = new File(filename);
-					byte[] fileContent;
-
-					try {
-						// convert it to a byte array
-						fileContent = Files.readAllBytes(file.toPath());
-						dOut.writeInt(fileContent.length); // first write the length of the file
-						dOut.write(fileContent);// write the file contents itself
-					} catch (IOException e1) {	
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} // catch
-				} // else if
-
+				//if not terminate command - need to write to execute socket
 				else {
-					String serverResponse = exec_input.readLine();
-					System.out.println(serverResponse);
-				} // else
-			}//else if not terminate command
+					out.println(command);
+					
+					//Show Process ID to the User
+					System.out.println("Process ID: " + exec_input.readLine());
+
+					if (command.equals("quit"))
+						break;
+
+					if (command.equals("ls") || command.equals("cd")) {
+						String serverResponse = exec_input.readLine();
+						System.out.println(serverResponse);
+					} // else
+
+					else if (command.substring(0, 3).equals("get")) {
+					
+						// The Input Stream is where you read data incoming from the socket
+						DataInputStream dIn = new DataInputStream(exec_socket.getInputStream());
+						String filename = wordParser(command.toCharArray(), 2);// determine the new file name
+
+						Process proc = Runtime.getRuntime().exec("touch " + filename);// create the file
+
+						OutputStream os = new FileOutputStream(filename);
+
+						// read in the size of the byte array
+						int length = dIn.readInt(); // read length of incoming message
+						if (length > 0) {
+							message = new byte[length];
+							dIn.readFully(message, 0, message.length); // read the message
+						} // if
+						os.write(message);// write the byte array to the file
+						os.close();
+					} // if get command
+
+					else if (command.substring(0, 3).equals("put")) {
+						String filename = wordParser(command.toCharArray(), 2);// determine the new file name
+						DataOutputStream dOut = new DataOutputStream(exec_socket.getOutputStream());
+
+						// determine the file
+						File file = new File(filename);
+						byte[] fileContent;
+
+						try {
+							// convert it to a byte array
+							fileContent = Files.readAllBytes(file.toPath());
+							dOut.writeInt(fileContent.length); // first write the length of the file
+							dOut.write(fileContent);// write the file contents itself
+						} catch (IOException e1) {	
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} // catch
+					} // else if
+
+					else {
+						String serverResponse = exec_input.readLine();
+						System.out.println(serverResponse);
+					} // else
+				}//else if not terminate command
+				
+				
+			}//if not executed in new thread
+			
 		} // while
 		
 		// close the sockets when you're done with them.
