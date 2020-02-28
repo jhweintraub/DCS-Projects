@@ -23,8 +23,8 @@ public class Server {
 
     
     //Fixed size pool of threads - 4
-    private static ExecutorService exec_pool = Executors.newFixedThreadPool(4);
-    private static ExecutorService term_pool = Executors.newFixedThreadPool(4);
+    private static ExecutorService exec_pool = Executors.newFixedThreadPool(15);
+    private static ExecutorService term_pool = Executors.newFixedThreadPool(15);
 
     
     public static void main(String[] args) throws IOException {
@@ -46,6 +46,8 @@ public class Server {
             clients.add(clientThread);
             System.out.println(clients.size());
 
+            //TODO - Spawn off new terminate thread
+            
             //execute the Runnable we just created - execute calls the ClientHandler's overrode run() method
             exec_pool.execute(clientThread);
             

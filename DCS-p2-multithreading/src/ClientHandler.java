@@ -155,13 +155,21 @@ public class ClientHandler implements Runnable {
 
 	    
 	    	//read in the size of the byte array
-	    	int length = dIn.readInt();                    // read length of incoming message
-	    	if(length>0) {
-	    	    message = new byte[length];
-	    	    dIn.readFully(message, 0, message.length); // read the message
-	    	}//if
+//	    	int length = dIn.readInt();                    // read length of incoming message
+//	    	if(length>0) {
+//	    	    message = new byte[length];
+//	    	    dIn.readFully(message, 0, message.length); // read the message
+//	    	}//if
+//	    	
+	    	message = new byte[8000];
+			int count;
+			while ((count = dIn.read(message)) > 0)
+			{
+				os.write(message, 0, count);
+			}
+			dIn.readFully(message, 0, message.length); // read the message
 	    	
-	    	os.write(message);//write the byte array to the file
+//	    	os.write(message);//write the byte array to the file
 	    	os.close();
 		} catch (IOException e) {
 			e.printStackTrace();
