@@ -1,5 +1,6 @@
 import javax.sound.sampled.Port;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -16,7 +17,10 @@ public class Server {
 
 
     //list of clients being connected.
-    public static ArrayList<Job> clients = new ArrayList<>();
+    public static ArrayList<Job> jobs = new ArrayList<>();
+    public static ArrayList<ClientHandler> clients = new ArrayList<>();
+//    public static ArrayList<File> files = new ArrayList<>(); //TODO - Keep Track of Files
+
     
     //Fixed size pool of threads - 4
     private static ExecutorService exec_pool = Executors.newFixedThreadPool(4);
@@ -39,7 +43,7 @@ public class Server {
 
             //Create the new thread - Runnable implemented by ClientHandler
             ClientHandler clientThread = new ClientHandler(exec_client);
-//            clients.add(clientThread);
+            clients.add(clientThread);
             System.out.println(clients.size());
 
             //execute the Runnable we just created - execute calls the ClientHandler's overrode run() method
@@ -54,7 +58,7 @@ public class Server {
     
     public static int getIndexofThreat(Long x) {
     	for(int y = 0; y < clients.size(); y++) {
-    		if (clients.get(y).getThreadID() == x) return y;
+    		if (jobs.get(y).getThreadID() == x) return y;
     	}
     	return -1;
     }

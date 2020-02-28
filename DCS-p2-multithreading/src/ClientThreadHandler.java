@@ -22,8 +22,6 @@ public class ClientThreadHandler implements Runnable {
 	// method is what gets written to the socket
 	
 
-	
-
 	/*This Class is where the new thread gets executed when the user appends their command with &. It's basically
 	the same as the Client.java but it's in a thread*/
 	

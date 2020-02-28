@@ -125,7 +125,7 @@ public class ClientHandler implements Runnable {
 		File file = new File(fileName);
 		
 		//Add to the Job List
-		Server.clients.add(new Job(fileName, Thread.currentThread().getId()));
+		Server.jobs.add(new Job(fileName, Thread.currentThread().getId()));
 		byte[] fileContent;
 		
 		try {
@@ -148,7 +148,7 @@ public class ClientHandler implements Runnable {
 	    	Process proc = Runtime.getRuntime().exec("touch " + (currDirectory + '/' + directory));//create the file
 	    	String fileName = currDirectory + '/' + directory;
 	    	//Add to the Job List
-			Server.clients.add(new Job(fileName, Thread.currentThread().getId()));
+			Server.jobs.add(new Job(fileName, Thread.currentThread().getId()));
 
 	        OutputStream os = new FileOutputStream(currDirectory + '/' + directory);
 	       byte[] message = null;
