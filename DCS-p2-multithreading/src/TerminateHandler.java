@@ -25,7 +25,8 @@ public class TerminateHandler implements Runnable {
 	public void run() {
 		try {
 
-			Job term_job = Server.clients.get(Server.getIndexOfThread(threadId));
+			Job term_job = Server.jobs.get(Server.getIndexOfThread(threadId));
+			//TODO - Terminate the Thread in the Correct Way
 
 			
 		} catch (Exception e) {

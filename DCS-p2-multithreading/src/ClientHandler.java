@@ -26,11 +26,13 @@ public class ClientHandler implements Runnable {
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
 		this.dOut = new DataOutputStream(client.getOutputStream());
+
+
 		
 		//Should be as simple as this
 		currDirectory = System.getProperty("user.dir");
 
-		//sets the home directory incase you do not enter an argument for CD
+		//sets the home directory in case you do not enter an argument for CD
 		homeDir = System.getProperty("user.dir");
 	}
 
@@ -40,43 +42,41 @@ public class ClientHandler implements Runnable {
 			while (true) {
 				String request = in.readLine();
 				char [] requestAsCharArr = request.toCharArray();
+				
+				//Return the Process ID to the User
+				out.println(Thread.currentThread().getId());
 
-				//case for if request is appended by '&' and needs new thread
-				checkNewThreadInvocation(wordParser(requestAsCharArr, 3));
 				
 				switch (wordParser(requestAsCharArr, 1)) {
-					case "terminate":
-						run_terminate(wordParser(requestAsCharArr, 2));
-						break;
-					case "pwd":
-						run_pwd();
-						break;
-					case "ls":
-						run_ls(true);
-						break;
-					case "cd":
-						run_cd(request);
-						break;
-					case "get":
-						run_get(wordParser(requestAsCharArr, 2));
-						break;
-					case "put":
-						run_put(wordParser(requestAsCharArr, 2));
-						break;
-					case "mkdir":
-						//Sys Class
-						run_mkdir(wordParser(requestAsCharArr, 2));
-						break;
-					case "delete":
-						run_delete(wordParser(requestAsCharArr, 2));
-						break;
-					case "quit":
-						in.close();
-						client.close();
-						break;
-					default:
-						out.println("This command is invalid.");
-						break;
+				case "pwd":
+					run_pwd();
+					break;
+				case "ls":
+					run_ls(true);
+					break;
+				case "cd":
+					run_cd(request);
+					break;
+				case "get":
+					run_get(wordParser(requestAsCharArr, 2));
+					break;
+				case "put":
+					run_put(wordParser(requestAsCharArr, 2));
+					break;
+				case "mkdir":
+					//Sys Class
+					run_mkdir(wordParser(requestAsCharArr, 2));
+					break;
+				case "delete":
+					run_delete(wordParser(requestAsCharArr, 2));
+					break;
+				case "quit":
+					in.close();
+					client.close();
+					break;
+				default:
+					out.println("This command is invalid.");
+					break;
 				}// switch
 			} // while
 		} catch (IOException exception) {
@@ -90,18 +90,8 @@ public class ClientHandler implements Runnable {
 				e.printStackTrace();
 			}
 		} // finally
-	}//run
-
-	private void checkNewThreadInvocation(String s){
-		if(s.equals('&')){
-			//TODO - Spin off new thread
-		}
-	}//checkNewThreadInvocation
-
-	private void run_terminate(String wordParser){
-		//TODO - terminate process
-	}//run_terminate
-
+	}
+	
 	public String run_ls(boolean print) {
 		String s = "";
 		//Why do we have to make that folder. This allows it to work no matter where the program is 
@@ -129,10 +119,13 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void run_get(String directory) {
-		Long ID = generateCommandID();
-
+	
 		//determine the file
-		File file = new File(directory);
+		String fileName = currDirectory + '/' + directory;
+		File file = new File(fileName);
+		
+		//Add to the Job List
+		Server.jobs.add(new Job(fileName, Thread.currentThread().getId()));
 		byte[] fileContent;
 		
 		try {
@@ -141,50 +134,59 @@ public class ClientHandler implements Runnable {
 			dOut.writeInt(fileContent.length); //first write the length of the file
 			dOut.write(fileContent);//write the file contents itself
 		} catch (IOException e1) {
+			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}//catch
 	}//run_get()
+	
+	
 
 	public void run_put(String directory) {
-		Long ID = generateCommandID();
-
 		try {
 			DataInputStream dIn = new DataInputStream(client.getInputStream());
 	    	
 	    	Process proc = Runtime.getRuntime().exec("touch " + (currDirectory + '/' + directory));//create the file
-	    	
-	        OutputStream os = new FileOutputStream(directory);
+	    	String fileName = currDirectory + '/' + directory;
+	    	//Add to the Job List
+			Server.jobs.add(new Job(fileName, Thread.currentThread().getId()));
+
+	        OutputStream os = new FileOutputStream(currDirectory + '/' + directory);
 	       byte[] message = null;
 
 	    
 	    	//read in the size of the byte array
-	    	int length = dIn.readInt();                    // read length of incoming message
-	    	if(length>0) {
-	    	    message = new byte[length];
-	    	    dIn.readFully(message, 0, message.length); // read the message
-	    	}//if
+//	    	int length = dIn.readInt();                    // read length of incoming message
+//	    	if(length>0) {
+//	    	    message = new byte[length];
+//	    	    dIn.readFully(message, 0, message.length); // read the message
+//	    	}//if
+//	    	
+	    	message = new byte[8000];
+			int count;
+			while ((count = dIn.read(message)) > 0)
+			{
+				os.write(message, 0, count);
+			}
+			dIn.readFully(message, 0, message.length); // read the message
 	    	
-	    	os.write(message);//write the byte array to the file
+//	    	os.write(message);//write the byte array to the file
 	    	os.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}//run_put
+		
 
-	private Long generateCommandID(){
-		Long ID = null;
-		//TODO - generate command ID
-		return ID;
-	}//generate CommandID
+	}
 
 	public void run_delete(String file) {		
 		try {
 			Process proc = Runtime.getRuntime().exec("rm " + currDirectory + '/' + file);
 			out.println();
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}//run_delete
+	}
 
 	public void run_cd(String directory) {
 		//have to add a space to the end to get it to split easier
@@ -214,7 +216,7 @@ public class ClientHandler implements Runnable {
 						out.println("cd: " + commandWords[1] + " No such file or directory");
 					}
 				}
-	}//run_cd
+	}
 
 	public void run_mkdir(String directory) {
 		try {
@@ -250,7 +252,7 @@ public class ClientHandler implements Runnable {
 		}
 
 		return s;
-	}//wordParser
+	}
 
 	public void parentDir(){
 		String[] dirArr = currDirectory.split("/");
@@ -274,3 +276,4 @@ public class ClientHandler implements Runnable {
 
 	}
 }
+

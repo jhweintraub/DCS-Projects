@@ -21,7 +21,7 @@ public class Client {
 	public static int SERVER_EXECUTE_PORT;
 	public static int SERVER_TERMINATE_PORT;
 	public static byte[] message;
-    private static ExecutorService exec_pool = Executors.newFixedThreadPool(4);
+    private static ExecutorService exec_pool = Executors.newFixedThreadPool(15);
     public static ArrayList<ClientThreadHandler> clients = new ArrayList<>();
 
 
@@ -52,18 +52,21 @@ public class Client {
 
 		
 		while (true) {
-			
 			System.out.print("myftp> ");
 
 			// once connected to the server -- initiate the commands
 			String command = keyboard.readLine();
 			
+			
 			//Execute in new thread if command is appended with &
 			if (command.charAt(command.length()-1) == '&' ) {
-				ClientThreadHandler clientThread = new ClientThreadHandler(exec_socket, term_socket, command);
+				command = command.substring(0, command.length()-1);
+				ClientThreadHandler clientThread = new ClientThreadHandler(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]), command);
+//				ClientThreadHandler clientThread = new ClientThreadHandler(exec_socket, term_socket, command.substring(0, command.length()-1));
 	            clients.add(clientThread);
 	            //execute the Runnable we just created - execute calls the ClientThreadHandler's overrode run() method
 	            exec_pool.execute(clientThread);
+	            continue;
 			}//if appended with &
 			
 			//If running in main thread
@@ -144,7 +147,7 @@ public class Client {
 		System.exit(0);
 	}// main()
 
-	private static String wordParser(char[] c, int wordNumber) {
+	public static String wordParser(char[] c, int wordNumber) {
 		String s = "";
 		int spaceCount = 0;
 

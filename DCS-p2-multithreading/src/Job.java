@@ -2,13 +2,13 @@ import java.io.File;
 import java.util.concurrent.*; 
 
 public class Job {
-	private File file;
+	private String fileName;
 	private Semaphore sem;
 	private Long threadId;
 	
-	public Job(String filename, Long id) {
+	public Job(String file_descript, Long id) {
 		try {
-			this.file = new File(filename);
+			this.fileName = file_descript;
 			this.sem = new Semaphore(1);
 			this.threadId = id;
 		
@@ -25,8 +25,8 @@ public class Job {
 		return sem;
 	}//getSem
 	
-	public File getFile() {
-		return file;
+	public String getFile() {
+		return fileName;
 	}//getFile
 	
 	//TODO - Delete Method

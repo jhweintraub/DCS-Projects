@@ -1,5 +1,6 @@
 import javax.sound.sampled.Port;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -17,16 +18,14 @@ public class Server {
 
 
     //list of clients being connected.
-    public static ArrayList<Job> clients = new ArrayList<>();
 
-    /*
-    Should we have a class that handles the initial socket connections for nport and tport?
-    (as stated in project description)
-     */
+    public static ArrayList<Job> jobs = new ArrayList<>();
+    public static ArrayList<ClientHandler> clients = new ArrayList<>();
+//    public static ArrayList<File> files = new ArrayList<>(); //TODO - Keep Track of Files
     
     //Fixed size pool of threads - 4
-    private static ExecutorService exec_pool = Executors.newFixedThreadPool(4);
-    private static ExecutorService term_pool = Executors.newFixedThreadPool(4);
+    private static ExecutorService exec_pool = Executors.newFixedThreadPool(15);
+    private static ExecutorService term_pool = Executors.newFixedThreadPool(15);
 
     public static void main(String[] args) throws IOException {
     	NPORT = Integer.parseInt(args[0]);
@@ -44,9 +43,12 @@ public class Server {
 
             //Create the new thread - Runnable implemented by ClientHandler
             ClientHandler clientThread = new ClientHandler(exec_client);
-//          clients.add(clientThread);
+
+            clients.add(clientThread);
             System.out.println(clients.size());
 
+            //TODO - Spawn off new terminate thread
+            
             //execute the Runnable we just created - execute calls the ClientHandler's overrode run() method
             exec_pool.execute(clientThread);
         }
@@ -56,7 +58,7 @@ public class Server {
     
     public static int getIndexOfThread(Long x) {
     	for(int y = 0; y < clients.size(); y++) {
-    		if (clients.get(y).getThreadID() == x) return y;
+    		if (jobs.get(y).getThreadID() == x) return y;
     	}
     	return -1;
     }
