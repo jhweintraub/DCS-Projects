@@ -73,7 +73,7 @@ public class Client {
 			else {
 				if (command.contains("terminate")) {
 					System.out.println("printing");
-					out_term.println(ClientHandler.wordParser(command.toCharArray(), 2));//sends command to TPORT
+					out_term.println(wordParser(command.toCharArray(), 2));//sends command to TPORT
 					System.out.println("waiting to readLine");
 					System.out.println(term_input.readLine());
 
