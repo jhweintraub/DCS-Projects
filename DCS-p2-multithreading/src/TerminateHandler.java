@@ -24,15 +24,25 @@ public class TerminateHandler implements Runnable {
 	@Override
 	public void run() {
 		try {
-
+			System.out.println("hello");
 			Job term_job = Server.jobs.get(Server.getIndexOfThread(threadId));
-			//TODO - Terminate the Thread in the Correct Way
 
-			
+			//release file from semaphore
+			term_job.getSem().release();
+
+			//safely terminate thread
+			while(true){
+				try{
+					Thread.sleep((long)15000);
+				}catch(InterruptedException e){
+					//Do Nothing
+				}
+			}//while
+
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}//try_catch
 		
-	}
+	}//run
 
-}
+}//TerminateHandler

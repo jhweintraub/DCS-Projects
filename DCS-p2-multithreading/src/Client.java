@@ -72,8 +72,11 @@ public class Client {
 			//If running in main thread
 			else {
 				if (command.contains("terminate")) {
-					out_term.print(command);
+					out_term.print(ClientHandler.wordParser(command.toCharArray(), 2));//sends command to TPORT
 					System.out.println(term_input.readLine());
+
+					//TODO - cleanup files that were terminated
+
 				}//if
 				
 				//if not terminate command - need to write to execute socket
@@ -97,6 +100,7 @@ public class Client {
 						DataInputStream dIn = new DataInputStream(exec_socket.getInputStream());
 						String filename = wordParser(command.toCharArray(), 2);// determine the new file name
 
+						//this isn't used?
 						Process proc = Runtime.getRuntime().exec("touch " + filename);// create the file
 
 						OutputStream os = new FileOutputStream(filename);

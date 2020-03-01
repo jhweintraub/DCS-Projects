@@ -45,7 +45,6 @@ public class ClientHandler implements Runnable {
 				
 				//Return the Process ID to the User
 				out.println(Thread.currentThread().getId());
-
 				
 				switch (wordParser(requestAsCharArr, 1)) {
 				case "pwd":
@@ -230,7 +229,7 @@ public class ClientHandler implements Runnable {
 	}
 
 	//returns a given String from a char array
-	private static String wordParser(char [] c, int wordNumber){
+	public static String wordParser(char [] c, int wordNumber){
 		if (c[0] == 'l' && c[1] == 's') return "ls";
 		
 		String s = "";
