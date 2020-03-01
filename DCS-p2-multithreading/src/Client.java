@@ -41,7 +41,7 @@ public class Client {
 
 
 		BufferedReader exec_input = new BufferedReader(new InputStreamReader(exec_socket.getInputStream()));
-		BufferedReader term_input = new BufferedReader(new InputStreamReader(exec_socket.getInputStream()));
+		BufferedReader term_input = new BufferedReader(new InputStreamReader(term_socket.getInputStream()));
 
 		BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
 
@@ -72,7 +72,9 @@ public class Client {
 			//If running in main thread
 			else {
 				if (command.contains("terminate")) {
-					out_term.print(ClientHandler.wordParser(command.toCharArray(), 2));//sends command to TPORT
+					System.out.println("printing");
+					out_term.println(ClientHandler.wordParser(command.toCharArray(), 2));//sends command to TPORT
+					System.out.println("waiting to readLine");
 					System.out.println(term_input.readLine());
 
 					//TODO - cleanup files that were terminated

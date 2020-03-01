@@ -45,7 +45,7 @@ public class ClientHandler implements Runnable {
 				
 				//Return the Process ID to the User
 				out.println(Thread.currentThread().getId());
-				
+
 				switch (wordParser(requestAsCharArr, 1)) {
 				case "pwd":
 					run_pwd();

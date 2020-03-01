@@ -12,37 +12,44 @@ public class TerminateHandler implements Runnable {
 	private DataOutputStream dOut;
 	private Long threadId;
 	
-	public TerminateHandler(Socket clientSocket, Long threadID) throws IOException {
+	public TerminateHandler(Socket clientSocket) throws IOException {
 		this.client = clientSocket;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
 		this.dOut = new DataOutputStream(client.getOutputStream());
-		this.threadId = threadID;
+		this.threadId = null;
 
 	}
 	
 	@Override
 	public void run() {
-		try {
-			System.out.println("hello");
-			Job term_job = Server.jobs.get(Server.getIndexOfThread(threadId));
-
-			//release file from semaphore
-			term_job.getSem().release();
-
-			//safely terminate thread
+		try{
 			while(true){
-				try{
-					Thread.sleep((long)15000);
-				}catch(InterruptedException e){
-					//Do Nothing
-				}
-			}//while
+				System.out.println("Waiting for terminate command.");
+				String input = in.readLine();
+				threadId = Long.parseLong(input);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}//try_catch
-		
+				out.println("Terminating Process: " + threadId);
+
+				Job termJob = null;
+				for(Job job : Server.jobs){
+					if(job.getThreadID() == threadId) termJob = job;
+				}//for
+
+				termJob.getSem().release();
+
+				while(true){
+					try{
+						Thread.sleep((long) 15000);
+					}catch (InterruptedException e){
+						//do nothing
+					}
+				}//while
+
+			}//while
+		}catch (IOException e){
+			//do nothing
+		}
 	}//run
 
 }//TerminateHandler
