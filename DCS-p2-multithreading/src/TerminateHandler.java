@@ -36,7 +36,7 @@ public class TerminateHandler implements Runnable {
 					if(job.getThreadID() == threadId) termJob = job;
 				}//for
 
-				termJob.getSem().release();
+				//termJob.getSem().release();
 
 				while(true){
 					try{

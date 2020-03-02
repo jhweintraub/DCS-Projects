@@ -41,7 +41,7 @@ public class Client {
 
 
 		BufferedReader exec_input = new BufferedReader(new InputStreamReader(exec_socket.getInputStream()));
-		BufferedReader term_input = new BufferedReader(new InputStreamReader(term_socket.getInputStream()));
+		BufferedReader term_input = new BufferedReader(new InputStreamReader(exec_socket.getInputStream()));
 
 		BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
 
@@ -72,13 +72,8 @@ public class Client {
 			//If running in main thread
 			else {
 				if (command.contains("terminate")) {
-					System.out.println("printing");
-					out_term.println(wordParser(command.toCharArray(), 2));//sends command to TPORT
-					System.out.println("waiting to readLine");
+					out_term.print(command);
 					System.out.println(term_input.readLine());
-
-					//TODO - cleanup files that were terminated
-
 				}//if
 				
 				//if not terminate command - need to write to execute socket
@@ -102,7 +97,6 @@ public class Client {
 						DataInputStream dIn = new DataInputStream(exec_socket.getInputStream());
 						String filename = wordParser(command.toCharArray(), 2);// determine the new file name
 
-						//this isn't used?
 						Process proc = Runtime.getRuntime().exec("touch " + filename);// create the file
 
 						OutputStream os = new FileOutputStream(filename);
