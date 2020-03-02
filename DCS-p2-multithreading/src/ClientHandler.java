@@ -20,14 +20,18 @@ public class ClientHandler implements Runnable {
 	private static String currDirectory;
 	private static String lastDirectory = null;
 	private String homeDir;
-	
 	private int fileIndex = -1;
+	private TerminateHandler termHandler;
+
+	public String filePath;
+	public boolean terminate;
 
 	public ClientHandler(Socket clientSocket) throws IOException {
 		this.client = clientSocket;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
 		this.dOut = new DataOutputStream(client.getOutputStream());
+		terminate = false;
 
 
 
@@ -50,38 +54,38 @@ public class ClientHandler implements Runnable {
 
 
 				switch (wordParser(requestAsCharArr, 1)) {
-				case "pwd":
-					run_pwd();
-					break;
-				case "ls":
-					run_ls(true);
-					break;
-				case "cd":
-					run_cd(request);
-					break;
-				case "get":
-					run_get(wordParser(requestAsCharArr, 2));
-					break;
-				case "put":
-					run_put(wordParser(requestAsCharArr, 2));
-					break;
-				case "mkdir":
-					//Sys Class
-					run_mkdir(wordParser(requestAsCharArr, 2));
-					break;
-				case "delete":
-					run_delete(wordParser(requestAsCharArr, 2));
-					break;
-				case "quit":
-					in.close();
-					client.close();
-					break;
-				default:
-					out.println("This command is invalid.");
-					break;
+					case "pwd":
+						run_pwd();
+						break;
+					case "ls":
+						run_ls(true);
+						break;
+					case "cd":
+						run_cd(request);
+						break;
+					case "get":
+						run_get(wordParser(requestAsCharArr, 2));
+						break;
+					case "put":
+						run_put(wordParser(requestAsCharArr, 2));
+						break;
+					case "mkdir":
+						//Sys Class
+						run_mkdir(wordParser(requestAsCharArr, 2));
+						break;
+					case "delete":
+						run_delete(wordParser(requestAsCharArr, 2));
+						break;
+					case "quit":
+						in.close();
+						client.close();
+						break;
+					default:
+						out.println("This command is invalid.");
+						break;
 				}// switch
 			} // while
-		} catch (IOException exception) {
+		} catch (IOException e) {
 
 		} finally {
 			out.close();
@@ -96,7 +100,7 @@ public class ClientHandler implements Runnable {
 
 	public String run_ls(boolean print) {
 		String s = "";
-		//Why do we have to make that folder. This allows it to work no matter where the program is 
+		//Why do we have to make that folder. This allows it to work no matter where the program is
 		File dir = new File(currDirectory);
 		File[] childs = dir.listFiles();
 
@@ -124,6 +128,7 @@ public class ClientHandler implements Runnable {
 		System.out.println("Starting Get");
 		//determine the file
 		String fileName = currDirectory + '/' + directory;
+		filePath = fileName;
 		File file = new File(fileName);
 
 
@@ -131,47 +136,67 @@ public class ClientHandler implements Runnable {
 		addJob(fileName, Thread.currentThread().getId() );
 
 		byte[] fileContent;
-		
-		
-		
+
+
+
 		try {
 			//convert it to a byte array
 			Server.files.getFiles().get(fileIndex).getLock().acquire();
 			Server.files.getFiles().get(fileIndex).incrementRead();
-			
+
 			System.out.println("Got Lock");
 			if(Server.files.getFiles().get(fileIndex).getReadcnt() == 1) {
 				Server.files.getFiles().get(fileIndex).getWrt().acquire();
 				System.out.println("got write lock");
 			}
-			
-			
+
+
 			fileContent = Files.readAllBytes(file.toPath());
 			dOut.writeInt(fileContent.length); //first write the length of the file
 			dOut.write(fileContent);//write the file contents itself
-			
-			
+
+			//TODO: This needs to be completed, update the byte count somehow
+			//is this what you mean?
+			int writeByteCount = dOut.size();
+
+			if(writeByteCount % 1000 == 0) {
+				//check for terminate command
+				if(terminate) {
+					//were done reading, still have the lock so we can safely make this call
+					Server.files.getFiles().get(fileIndex).decrementRead();
+					if(Server.files.getFiles().get(fileIndex).getReadcnt() == 0) {
+						//make sure we can drop this lock to allow others to write the file
+						Server.files.getFiles().get(fileIndex).getWrt().release();
+					}
+
+
+					Server.files.getFiles().get(fileIndex).getLock().release();
+
+					file.delete();
+
+					//kill thread
+					while(true) Thread.sleep(15000);
+				}
+			}
+
 			Server.files.getFiles().get(fileIndex).getLock().release();
-			
+			//THIS IS WHERE MULTIPLE READS COULD JUMP IN
+
 			Server.files.getFiles().get(fileIndex).getLock().acquire();
 			Server.files.getFiles().get(fileIndex).decrementRead();
 			if(Server.files.getFiles().get(fileIndex).getReadcnt() == 0) {
 				Server.files.getFiles().get(fileIndex).getWrt().release();
 			}
-			
+
 			Server.files.getFiles().get(fileIndex).getLock().release();
-			
-			
-			
-		} catch (IOException e1) {
+
+
+
+		} catch (IOException | InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}//catch
- catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		
+
 		System.out.println("TRANSFER COMPLETE FROM: " + Thread.currentThread().getId());
 	}//run_get()
 
@@ -179,16 +204,16 @@ public class ClientHandler implements Runnable {
 
 	public void run_put(String directory) {
 		try {
-			
-			
+
+
 			DataInputStream dIn = new DataInputStream(client.getInputStream());
 
 			Process proc = Runtime.getRuntime().exec("touch " + (currDirectory + '/' + directory));//create the file
 			String fileName = currDirectory + '/' + directory;
 			//Add to the Job List
-			
+
 			addJob(fileName, Thread.currentThread().getId() );
-			
+
 			Server.files.getFiles().get(fileIndex).getWrt().acquire();
 
 			OutputStream os = new FileOutputStream(currDirectory + '/' + directory);
@@ -201,12 +226,28 @@ public class ClientHandler implements Runnable {
 			//	    	    message = new byte[length];
 			//	    	    dIn.readFully(message, 0, message.length); // read the message
 			//	    	}//if
-			//	    	
+			//
 			System.out.println("Transfer Starting in: " + Thread.currentThread().getId());
 			message = new byte[8000];
-			int count;
-			while ((count = dIn.read(message)) > 0)
+			int count = 0;
+			while ((dIn.read(message)) > 0)
 			{
+
+
+				//TODO: This needs to be completed, update the byte count somehow
+				//is this not taken care of count += dIn.read(message) ?
+				count += dIn.read(message);
+				if(count % 1000 == 0) {
+					if(terminate){
+						Server.files.getFiles().get(fileIndex).getWrt().release();
+
+						run_delete(fileName);
+
+						//kill thread
+						while(true) Thread.sleep(15000);
+					}
+
+				}
 				os.write(message, 0, count);
 			}
 			dIn.readFully(message, 0, message.length); // read the message
@@ -223,16 +264,16 @@ public class ClientHandler implements Runnable {
 
 	}
 
-	public void run_delete(String file) {	
+	public void run_delete(String file) {
 		String fileName = currDirectory + '/' + file;
 
 		try {
 			addJob(fileName, Thread.currentThread().getId() );
 			Server.files.getFiles().get(fileIndex).getWrt().acquire();
-			
+
 			Process proc = Runtime.getRuntime().exec("rm " + currDirectory + '/' + file);
 			out.println();
-			
+
 			Server.files.getFiles().get(fileIndex).getWrt().release();
 
 		} catch (IOException | InterruptedException e) {
@@ -256,7 +297,7 @@ public class ClientHandler implements Runnable {
 		else if(commandWords[1].equals("..")){
 			parentDir();
 			out.println();
-		} 
+		}
 		else{
 			if(isValidPath(commandWords[1])){
 				if(commandWords[1].charAt(0) == '/'){
@@ -329,6 +370,8 @@ public class ClientHandler implements Runnable {
 
 	}
 
+
+	// I dont think we have to worry about a termination here at all
 	public void addJob(String fileName, Long tid)  {
 		try {
 			Job temp = new Job(fileName, tid);
@@ -351,14 +394,13 @@ public class ClientHandler implements Runnable {
 
 					System.out.println("I am Reading: " + Thread.currentThread().getId());
 					temp.setFileIndex(i);
-					
+
 					//this is this class's copy: just makes it easier
 					fileIndex = i;
 					break;
 					//TODO: CHECK IF THERES A WRITE GOING ON THE FILE NOW
 					/*
 					Server.jobsLock.acquire();
-
 					//This is how we link it
 					
 					Server.jobs.add(temp);
@@ -391,7 +433,7 @@ public class ClientHandler implements Runnable {
 				Server.files.getWrt().release();
 
 			}
-			
+
 			Server.jobsLock.acquire();
 			Server.jobs.add(temp);
 			Server.jobsLock.release();
@@ -404,6 +446,8 @@ public class ClientHandler implements Runnable {
 		}
 
 	}
+
+	public void setTermHandler(TerminateHandler t){ termHandler = t;}
 
 
 }

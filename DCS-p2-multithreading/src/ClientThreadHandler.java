@@ -38,8 +38,6 @@ public class ClientThreadHandler implements Runnable {
 		this.execSocket = new Socket(hostName, execPort);
 		this.termSocket = new Socket(hostName, termPort);
 
-
-
 		this.exec_input = new BufferedReader(new InputStreamReader(execSocket.getInputStream()));
 		this.term_input = new BufferedReader(new InputStreamReader(termSocket.getInputStream()));
 
@@ -54,7 +52,7 @@ public class ClientThreadHandler implements Runnable {
 		//TODO - Copy the Code from the Client.Java Class Essentially
 		if (command.contains("terminate")) {
 
-			out_term.println(ClientHandler.wordParser(command.toCharArray(), 2));
+			out_term.println(command);
 
 			try {
 				System.out.println(term_input.readLine());

@@ -41,7 +41,7 @@ public class Client {
 
 
 		BufferedReader exec_input = new BufferedReader(new InputStreamReader(exec_socket.getInputStream()));
-		BufferedReader term_input = new BufferedReader(new InputStreamReader(exec_socket.getInputStream()));
+		BufferedReader term_input = new BufferedReader(new InputStreamReader(term_socket.getInputStream()));
 
 		BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
 
@@ -72,8 +72,13 @@ public class Client {
 			//If running in main thread
 			else {
 				if (command.contains("terminate")) {
-					out_term.print(command);
-					System.out.println(term_input.readLine());
+					out_term.println(command);
+					String message = term_input.readLine();
+					System.out.println(message);
+
+					File fileToDelete = new File(term_input.readLine());
+					fileToDelete.delete();
+
 				}//if
 				
 				//if not terminate command - need to write to execute socket

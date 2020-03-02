@@ -10,14 +10,15 @@ public class TerminateHandler implements Runnable {
 	private BufferedReader in;
 	private PrintWriter out;
 	private DataOutputStream dOut;
-	private Long threadId;
+	private static Long threadID;
+	private static ClientHandler toTerminate;
 	
 	public TerminateHandler(Socket clientSocket) throws IOException {
 		this.client = clientSocket;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
 		this.dOut = new DataOutputStream(client.getOutputStream());
-		this.threadId = null;
+		this.threadID = null;
 
 	}
 	
@@ -25,31 +26,25 @@ public class TerminateHandler implements Runnable {
 	public void run() {
 		try{
 			while(true){
-				System.out.println("Waiting for terminate command.");
 				String input = in.readLine();
-				threadId = Long.parseLong(input);
+				threadID = Long.parseLong(ClientHandler.wordParser(input.toCharArray(), 2));
 
-				out.println("Terminating Process: " + threadId);
+				String message = "Terminating Process: " + threadID;
+				System.out.println(message);
+				out.println(message);
 
-				Job termJob = null;
-				for(Job job : Server.jobs){
-					if(job.getThreadID() == threadId) termJob = job;
-				}//for
+				toTerminate.terminate = true;
 
-				//termJob.getSem().release();
-
-				while(true){
-					try{
-						Thread.sleep((long) 15000);
-					}catch (InterruptedException e){
-						//do nothing
-					}
-				}//while
+				String pathToDelete = toTerminate.filePath;
+				out.println(pathToDelete);
 
 			}//while
 		}catch (IOException e){
 			//do nothing
 		}
 	}//run
+
+	public Long getThreadID(){ return threadID; }
+	public void setClientHandler(ClientHandler c) { toTerminate = c; }
 
 }//TerminateHandler

@@ -29,9 +29,7 @@ public class Job {
 	public void setFileIndex(int fileIndex) {
 		this.fileIndex = fileIndex;
 	}
-	
-	
-	
+
 	
 	
 }//Job
