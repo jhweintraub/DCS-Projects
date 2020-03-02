@@ -1,34 +1,37 @@
-import java.io.File;
-import java.util.concurrent.*; 
-
 public class Job {
 	private String fileName;
-	private Semaphore sem;
-	private Long threadId;
+	private Long threadID;
+	//Index in the file array that were using
+	private int fileIndex;
 	
-	public Job(String file_descript, Long id) {
-		try {
-			this.fileName = file_descript;
-			this.sem = new Semaphore(1);
-			this.threadId = id;
+	
+	public Job(String fileName, Long threadId) {
 		
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}//Job
-	
-	public Long getThreadID() {
-		return threadId;
-	}//getThreadID
-	
-	public Semaphore getSem() {
-		return sem;
-	}//getSem
-	
-	public String getFile() {
+		this.fileName = fileName;
+		this.threadID = threadId;
+		this.fileIndex = -1;
+	}
+	public String getFileName() {
 		return fileName;
-	}//getFile
+	}
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+	public Long getThreadID() {
+		return threadID;
+	}
+	public void setThreadId(Long threadId) {
+		this.threadID = threadId;
+	}
+	public int getFileIndex() {
+		return fileIndex;
+	}
+	public void setFileIndex(int fileIndex) {
+		this.fileIndex = fileIndex;
+	}
 	
-	//TODO - Delete Method
+	
+	
+	
 	
 }//Job
