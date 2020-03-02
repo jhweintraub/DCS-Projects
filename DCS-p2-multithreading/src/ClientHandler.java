@@ -166,6 +166,8 @@ public class ClientHandler implements Runnable {
 					
 					Server.files.getFiles().get(fileIndex).getLock().release();
 					
+					//TODO: Kill thread
+					return;
 				}
 			}
 			
