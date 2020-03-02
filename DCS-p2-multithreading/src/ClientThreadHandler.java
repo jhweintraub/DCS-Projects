@@ -53,7 +53,7 @@ public class ClientThreadHandler implements Runnable {
 	public void run() {
 		//TODO - Copy the Code from the Client.Java Class Essentially
 		if (command.contains("terminate")) {
-			out_term.print(ClientHandler.wordParser(command.toCharArray(), 2));
+			out_term.println(ClientHandler.wordParser(command.toCharArray(), 2));
 			try {
 				System.out.println(term_input.readLine());
 			} catch (IOException e) {
