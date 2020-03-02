@@ -25,6 +25,7 @@ public class ClientHandler implements Runnable {
 
 	public String filePath;
 	public boolean terminate;
+	public long ID;
 
 	public ClientHandler(Socket clientSocket) throws IOException {
 		this.client = clientSocket;
@@ -32,8 +33,6 @@ public class ClientHandler implements Runnable {
 		out = new PrintWriter(client.getOutputStream(), true);
 		this.dOut = new DataOutputStream(client.getOutputStream());
 		terminate = false;
-
-
 
 		//Should be as simple as this
 		currDirectory = System.getProperty("user.dir");
@@ -46,22 +45,18 @@ public class ClientHandler implements Runnable {
 	public void run() {
 		try {
 
+			while(true){
 
-
-
-			while (true) {
-				
 				while(terminate){
 					Thread.sleep(15000);
 				}
 
-
 				String request = in.readLine();
+
 				char [] requestAsCharArr = request.toCharArray();
 
 				//Return the Process ID to the User
-				out.println(Thread.currentThread().getId());
-
+				out.println(ID = Thread.currentThread().getId());
 
 				switch (wordParser(requestAsCharArr, 1)) {
 					case "pwd":
@@ -141,13 +136,10 @@ public class ClientHandler implements Runnable {
 		filePath = fileName;
 		File file = new File(fileName);
 
-
 		//Add to the Job List
 		addJob(fileName, Thread.currentThread().getId() );
 
 		byte[] fileContent;
-
-
 
 		try {
 			//convert it to a byte array
@@ -201,7 +193,6 @@ public class ClientHandler implements Runnable {
 			Server.files.getFiles().get(fileIndex).getLock().release();
 
 
-
 		} catch (IOException | InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -209,8 +200,6 @@ public class ClientHandler implements Runnable {
 
 		System.out.println("TRANSFER COMPLETE FROM: " + Thread.currentThread().getId());
 	}//run_get()
-
-
 
 	public void run_put(String directory) {
 		try {
@@ -457,6 +446,7 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void setTermHandler(TerminateHandler t){ termHandler = t;}
-
+	public TerminateHandler getTermHandler(){ return termHandler;}
+	public void setTerminate(boolean b){ terminate = b; }
 
 }

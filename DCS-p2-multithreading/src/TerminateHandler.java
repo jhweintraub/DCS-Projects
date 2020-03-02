@@ -26,6 +26,7 @@ public class TerminateHandler implements Runnable {
 	public void run() {
 		try{
 			while(true){
+
 				String input = in.readLine();
 				threadID = Long.parseLong(ClientHandler.wordParser(input.toCharArray(), 2));
 
@@ -33,8 +34,15 @@ public class TerminateHandler implements Runnable {
 				System.out.println(message);
 				out.println(message);
 
-				toTerminate.terminate = true;
-
+				int  i = 0;
+				for(ClientHandler client : Server.clients){
+					if(threadID == client.ID){
+						System.out.println("Terminating Thread");
+						Server.clients.get(i).setTerminate(true);
+					}
+					i++;
+				}
+				
 				String pathToDelete = toTerminate.filePath;
 				out.println(pathToDelete);
 
