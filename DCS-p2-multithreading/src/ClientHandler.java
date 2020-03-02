@@ -150,8 +150,28 @@ public class ClientHandler implements Runnable {
 			dOut.writeInt(fileContent.length); //first write the length of the file
 			dOut.write(fileContent);//write the file contents itself
 			
+			//TODO: This needs to be completed, update the byte count somehow
+			int writeByteCount = 0;
+			boolean terminate = true; //this obviously is a dummy variable, read this somewhere else
+			if(writeByteCount % 1000 == 0) {
+				//check for terminate command
+				if(terminate) {
+					//were done reading, still have the lock so we can safely make this call
+					Server.files.getFiles().get(fileIndex).decrementRead();
+					if(Server.files.getFiles().get(fileIndex).getReadcnt() == 0) {
+						//make sure we can drop this lock to allow others to write the file
+						Server.files.getFiles().get(fileIndex).getWrt().release();
+					}
+					
+					
+					Server.files.getFiles().get(fileIndex).getLock().release();
+					
+				}
+			}
+			
 			
 			Server.files.getFiles().get(fileIndex).getLock().release();
+			//THIS IS WHERE MULTIPLE READS COULD JUMP IN 
 			
 			Server.files.getFiles().get(fileIndex).getLock().acquire();
 			Server.files.getFiles().get(fileIndex).decrementRead();
