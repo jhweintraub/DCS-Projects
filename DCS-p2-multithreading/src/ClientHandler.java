@@ -229,6 +229,14 @@ public class ClientHandler implements Runnable {
 			int count;
 			while ((count = dIn.read(message)) > 0)
 			{
+				
+				//TODO: This needs to be completed, update the byte count somehow
+				boolean terminate = true; //this obviously is a dummy variable, read this somewhere else
+				if(count % 1000 == 0) {
+					Server.files.getFiles().get(fileIndex).getWrt().release();
+					return;
+					
+				}
 				os.write(message, 0, count);
 			}
 			dIn.readFully(message, 0, message.length); // read the message
@@ -351,6 +359,8 @@ public class ClientHandler implements Runnable {
 
 	}
 
+	
+	// I dont think we have to worry about a termination here at all
 	public void addJob(String fileName, Long tid)  {
 		try {
 			Job temp = new Job(fileName, tid);
