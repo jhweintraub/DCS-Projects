@@ -45,7 +45,17 @@ public class ClientHandler implements Runnable {
 	@Override
 	public void run() {
 		try {
+
+
+
+
 			while (true) {
+				
+				while(terminate){
+					Thread.sleep(15000);
+				}
+
+
 				String request = in.readLine();
 				char [] requestAsCharArr = request.toCharArray();
 
@@ -85,7 +95,7 @@ public class ClientHandler implements Runnable {
 						break;
 				}// switch
 			} // while
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 
 		} finally {
 			out.close();
@@ -232,10 +242,9 @@ public class ClientHandler implements Runnable {
 			int count = 0;
 			while ((dIn.read(message)) > 0)
 			{
-
-
 				//TODO: This needs to be completed, update the byte count somehow
 				//is this not taken care of count += dIn.read(message) ?
+
 				count += dIn.read(message);
 				if(count % 1000 == 0) {
 					if(terminate){
