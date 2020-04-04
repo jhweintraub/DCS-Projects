@@ -37,12 +37,11 @@ public class TerminateHandler implements Runnable {
 				int  i = 0;
 				for(ClientHandler client : Server.clients){
 					if(threadID == client.ID){
-						System.out.println("Terminating Thread");
 						Server.clients.get(i).setTerminate(true);
 					}
 					i++;
 				}
-				
+
 				String pathToDelete = toTerminate.filePath;
 				out.println(pathToDelete);
 

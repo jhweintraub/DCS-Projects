@@ -229,12 +229,12 @@ public class ClientHandler implements Runnable {
 			System.out.println("Transfer Starting in: " + Thread.currentThread().getId());
 			message = new byte[8000];
 			int count = 0;
-			while ((dIn.read(message)) > 0)
+			while ((count = dIn.read(message)) > 0)
 			{
 				//TODO: This needs to be completed, update the byte count somehow
 				//is this not taken care of count += dIn.read(message) ?
 
-				count += dIn.read(message);
+
 				if(count % 1000 == 0) {
 					if(terminate){
 						Server.files.getFiles().get(fileIndex).getWrt().release();
