@@ -8,13 +8,11 @@ import java.util.concurrent.Executors;
 public class Coordinator {
 	private static int PORT = 0;
 	
-	//TODO: Establish MulticastSocket
-
 	//list of clients being connected.
-	private static ArrayList<CoordinatorHandler> members = new ArrayList<>();
-
+	public static ArrayList<CoordinatorHandler> participants = new ArrayList<>();
+	
 	//Fixed size pool of threads - 4
-	private static ExecutorService pool = Executors.newFixedThreadPool(4);
+	public static ExecutorService pool = Executors.newFixedThreadPool(15);
 
 	public static void main(String[] args) throws IOException {
 		PORT = Integer.parseInt(args[0]);
@@ -22,6 +20,8 @@ public class Coordinator {
 		System.out.println(System.getProperty("os.name"));
 
 		while (true) {
+			//TODO: Open Config File and read in information
+			
 			System.out.println("[SERVER] Waiting for client connection...");
 			Socket member = listener.accept();
 			System.out.println("[SERVER] Connected to client.");
@@ -29,14 +29,22 @@ public class Coordinator {
 			//Create the new thread - Runnable implemented by MemberHandler
 			//TODO: Pass MulticastSocket to Handler
 			CoordinatorHandler memberThread = new CoordinatorHandler(member);
-			members.add(memberThread);
-			System.out.println(members.size());
+			participants.add(memberThread);
+			System.out.println(participants.size());
 
 			//execute the Runnable we just created - execute calls the ClientHandler's overrode run() method
 			pool.execute(memberThread);
 
 			//Print the number of connected clients - when the socket is closed it gets removed from the ArrayList
 
+		}
+	}
+	
+	public static void Send(String message) {
+		for (CoordinatorHandler x : participants) {
+			if (x.getisConnected()) {
+				x.send(message);
+			}
 		}
 	}
 

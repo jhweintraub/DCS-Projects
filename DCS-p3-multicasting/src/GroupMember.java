@@ -9,21 +9,24 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.*;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GroupMember {
 
 	public static String COORDINATOR_SERVER_IP;
 	public static int COORDINATOR_SERVER_PORT;
-	public static boolean isConnected;
-	public static long disconnectTime;
-	public static long reconnectTime;
-	
-	
+
+	public static ArrayList<MemberHandler> members = new ArrayList<>();
+
+	public static ExecutorService pool = Executors.newFixedThreadPool(15);
+
 
 	public static void main(String[] args) throws IOException{
 		//TODO --- link to Config File to get info about Host and Port
-		
-		
+
+
 		//TODO: Hard Code Those In
 		//COORDINATOR_SERVER_IP = args[0];
 		//COORDINATOR_SERVER_PORT = Integer.parseInt(args[1]);
@@ -32,10 +35,15 @@ public class GroupMember {
 		Socket socket = new Socket(COORDINATOR_SERVER_IP, COORDINATOR_SERVER_PORT);
 		BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
-		
-		
-		//TODO: New Thread 
-		
+
+
+
+		//Fixed size pool of threads - 4
+		MemberHandler memberThread = new MemberHandler(1234, "test.txt"); //placeholder info - remove later
+//		members.add(memberThread);
+		//execute the Runnable we just created - execute calls the ClientHandler's overrode run() method
+//		pool.execute(memberThread);
+
 
 		// This is what writes to the socket - you use out.print() and whats inside the
 		// method is what gets written to the socket
@@ -49,29 +57,28 @@ public class GroupMember {
 
 			//out.println(command);
 			switch(command.split(" ")[0]) {
-				case "msend":
-					//Send message to coordinator
-					//MultiCast socket should be running in background thread
-					break;
-				case "register":
-					//Send Message to Coordinator
-					//Wait for Response
-					//Start listening thread
-					break;
-				case "deregister":
-					//kill the thread running on the multicast port
-					break;
-				case "reconnect":
-					//re-activate the message receiving/logging - take the thread out of sleep
-					//send request for missed messages to coordinator - use this thread
-					//receive messages and log them - client side parsing
-					break;
-				case "disconnect":
-					//put the thread to sleep and flip the boolean value
-					//Keep track of disconnect time
-					break;
+			case "msend":
+			case "reconnect":
+			case "disconnect":
+				out.println(command);
+				//Send message to coordinator
+				break;
+			case "register":
+				//assemble datagram
+				//send it to the coordinator
+
+				//We don't have the thread execute and start listening UNTIL it's been registered w the coordinator
+				members.add(memberThread);
+				pool.execute(memberThread);	
+				break;
+			case "deregister":
+				//Send Message to the Coordinator
+				//Kill the Thread
+				pool.shutdownNow(); //Kill the pool. 
+				break;
+
 			}//switch
-			
+
 
 
 		}//while

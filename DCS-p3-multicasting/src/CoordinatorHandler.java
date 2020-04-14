@@ -14,7 +14,14 @@ public class CoordinatorHandler implements Runnable{
 	private DataOutputStream dOut;
 	private Message[] messages;
 	
-	//TODO: Connect the MulticastSocket
+	//Send Information
+	private int Port;
+	private int ID;
+	private String IPAddr;
+	private boolean isConnected = false;
+	
+	//TODO: Temporal Information about Disconnection Time
+	
 
 	public CoordinatorHandler(Socket clientSocket) throws IOException {
 		this.client = clientSocket;
@@ -29,14 +36,27 @@ public class CoordinatorHandler implements Runnable{
 		try {
 			while (true) {
 				String request = in.readLine();
-				switch (request.split(" ")[0]) {
+				String command = request.split(" ")[0];
+				switch (command) {
 				case "msend":
-					//MulticastSocket Send
+					String message = request.substring(request.indexOf(" ")); //Take everything after msend command as msg
+					Coordinator.Send(message); //Get the 
+					//Log the Message to File
+					break;
+				case "disconnect":
+					this.isConnected = false;
 					break;
 				case "reconnect":
+					this.isConnected = true;
 					//Get List of Messages from array
 					//Send it back through the socket as one. Will be Parsed on the client side
-					
+					break;
+				case "register":
+					//make new Participant and add to list of Participants in Coordinator
+					break;
+				case "deregister":
+					out.println(request);
+					//Exit the Thread and kill it - this should take it out of the pool
 					break;
 				}// switch
 			} // while
@@ -54,6 +74,15 @@ public class CoordinatorHandler implements Runnable{
 			}
 		} // finally
 
+	}
+	
+	public boolean getisConnected() {
+		return isConnected;
+	}
+	
+	public void send(String message) {
+		//Send the message through the socket
+		out.println(message);
 	}
 
 }
