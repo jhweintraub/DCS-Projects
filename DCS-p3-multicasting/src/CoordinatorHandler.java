@@ -8,22 +8,28 @@ import java.net.Socket;
 
 public class CoordinatorHandler implements Runnable{
 
+	//ServerSocket Information
 	private Socket client;
 	private BufferedReader in;
 	private PrintWriter out;
 	private DataOutputStream dOut;
 	private Message[] messages;
 	
-	//Send Information
+	//SendSocket Information
 	private int Port;
 	private int ID;
 	private String IPAddr;
 	private boolean isConnected = false;
 	
+
+
+	
+	
 	//TODO: Temporal Information about Disconnection Time
 	
 
 	public CoordinatorHandler(Socket clientSocket) throws IOException {
+		//ServerSocket Info
 		this.client = clientSocket;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
@@ -53,6 +59,8 @@ public class CoordinatorHandler implements Runnable{
 					break;
 				case "register":
 					//make new Participant and add to list of Participants in Coordinator
+					System.out.println("this is a test of emergency prepardeness");
+					this.isConnected = true;
 					break;
 				case "deregister":
 					out.println(request);

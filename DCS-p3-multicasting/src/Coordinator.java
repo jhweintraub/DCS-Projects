@@ -1,12 +1,15 @@
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Coordinator {
 	private static int PORT = 0;
+	public static int TIME_THRESHOLD = 0;
 	
 	//list of clients being connected.
 	public static ArrayList<CoordinatorHandler> participants = new ArrayList<>();
@@ -15,7 +18,17 @@ public class Coordinator {
 	public static ExecutorService pool = Executors.newFixedThreadPool(15);
 
 	public static void main(String[] args) throws IOException {
-		PORT = Integer.parseInt(args[0]);
+		
+		//Parse Config File Info
+		File myObj = new File(args[0]);
+		ArrayList<String> configInfo = new ArrayList<>();
+		Scanner myReader = new Scanner(myObj);
+		while (myReader.hasNextLine()) configInfo.add(myReader.nextLine());
+		myReader.close();
+		PORT = Integer.parseInt(configInfo.get(0));
+		TIME_THRESHOLD = Integer.parseInt(configInfo.get(1));
+		
+		
 		ServerSocket listener = new ServerSocket(PORT);
 		System.out.println(System.getProperty("os.name"));
 
@@ -42,6 +55,7 @@ public class Coordinator {
 	
 	public static void Send(String message) {
 		for (CoordinatorHandler x : participants) {
+			System.out.println(x.getisConnected());
 			if (x.getisConnected()) {
 				x.send(message);
 			}

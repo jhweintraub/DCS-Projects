@@ -394,3 +394,9 @@ DCS-p1/out/production/Client_Server_Test/ClientHandler.class
 DCS-p1/out/production/Client_Server_Test/DateServer.class
 DCS-p1/out/production/Client_Server_Test/Test.class
 DCS-p1/out/production/Client_Server_Test/root/testing.txt
+/.metadata/
+DCS-p3-multicasting/src/Coordinator.class
+DCS-p3-multicasting/src/CoordinatorHandler.class
+DCS-p3-multicasting/src/GroupMember.class
+DCS-p3-multicasting/src/MemberHandler.class
+DCS-p3-multicasting/src/Message.class

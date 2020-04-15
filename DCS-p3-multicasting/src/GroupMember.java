@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,6 +18,9 @@ public class GroupMember {
 
 	public static String COORDINATOR_SERVER_IP;
 	public static int COORDINATOR_SERVER_PORT;
+	public static int GROUP_MEMBER_ID;
+	public static String LOG_FILE;
+
 
 	public static ArrayList<MemberHandler> members = new ArrayList<>();
 
@@ -24,12 +28,18 @@ public class GroupMember {
 
 
 	public static void main(String[] args) throws IOException{
-		//TODO --- link to Config File to get info about Host and Port
-
-
-		//TODO: Hard Code Those In
-		//COORDINATOR_SERVER_IP = args[0];
-		//COORDINATOR_SERVER_PORT = Integer.parseInt(args[1]);
+		
+		//Parse Config File Info
+		File myObj = new File(args[0]);
+		ArrayList<String> configInfo = new ArrayList<>();
+		Scanner myReader = new Scanner(myObj);
+		while (myReader.hasNextLine()) configInfo.add(myReader.nextLine());
+		myReader.close();
+		
+		GROUP_MEMBER_ID = Integer.parseInt(configInfo.get(0)); 
+		LOG_FILE = configInfo.get(1);
+		COORDINATOR_SERVER_IP = configInfo.get(2).split(" ")[0];
+		COORDINATOR_SERVER_PORT = Integer.parseInt(configInfo.get(2).split(" ")[1]);
 
 		//Specific Socket for sending to the Coordinator
 		Socket socket = new Socket(COORDINATOR_SERVER_IP, COORDINATOR_SERVER_PORT);
@@ -37,16 +47,10 @@ public class GroupMember {
 		BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
 
 
-
 		//Fixed size pool of threads - 4
-		MemberHandler memberThread = new MemberHandler(1234, "test.txt"); //placeholder info - remove later
-//		members.add(memberThread);
-		//execute the Runnable we just created - execute calls the ClientHandler's overrode run() method
-//		pool.execute(memberThread);
+		MemberHandler memberThread = new MemberHandler(socket, LOG_FILE); //placeholder info - remove later
 
-
-		// This is what writes to the socket - you use out.print() and whats inside the
-		// method is what gets written to the socket
+		//Write through the Socket
 		PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
 		while (true) {
@@ -66,17 +70,22 @@ public class GroupMember {
 			case "register":
 				//assemble datagram
 				//send it to the coordinator
+				out.println(command);
 
 				//We don't have the thread execute and start listening UNTIL it's been registered w the coordinator
 				members.add(memberThread);
 				pool.execute(memberThread);	
 				break;
 			case "deregister":
-				//Send Message to the Coordinator
+				//TODO: Send Message to the Coordinator
+				
 				//Kill the Thread
-				pool.shutdownNow(); //Kill the pool. 
+				members.remove(0);
+				pool.shutdownNow(); //Kill the pool - we can Shut down the entire pool cause there's only one other thread
 				break;
-
+			default:
+				System.out.println("Invalid Choice. Please Try Again");
+				break;
 			}//switch
 
 
