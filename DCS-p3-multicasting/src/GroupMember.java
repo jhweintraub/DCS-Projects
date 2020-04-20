@@ -68,13 +68,14 @@ public class GroupMember {
 				//Send message to coordinator
 				break;
 			case "register":
+				//Execute Thread B before sending to the coordinator
+				members.add(memberThread);
+				pool.execute(memberThread);	
+				
 				//assemble datagram
 				//send it to the coordinator
 				out.println(command);
-
-				//We don't have the thread execute and start listening UNTIL it's been registered w the coordinator
-				members.add(memberThread);
-				pool.execute(memberThread);	
+				
 				break;
 			case "deregister":
 				//TODO: Send Message to the Coordinator
