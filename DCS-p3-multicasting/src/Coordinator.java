@@ -9,7 +9,8 @@ import java.util.concurrent.Executors;
 
 public class Coordinator {
 	private static int PORT = 0;
-	public static int TIME_THRESHOLD = 0;
+	public static ServerSocket listener;
+	public static long TIME_THRESHOLD = 0;
 	
 	//list of clients being connected.
 	public static ArrayList<CoordinatorHandler> participants = new ArrayList<>();
@@ -26,10 +27,11 @@ public class Coordinator {
 		while (myReader.hasNextLine()) configInfo.add(myReader.nextLine());
 		myReader.close();
 		PORT = Integer.parseInt(configInfo.get(0));
-		TIME_THRESHOLD = Integer.parseInt(configInfo.get(1));
+		TIME_THRESHOLD = Long.parseLong(configInfo.get(1));
+
 		
 		
-		ServerSocket listener = new ServerSocket(PORT);
+		listener = new ServerSocket(PORT);
 		System.out.println(System.getProperty("os.name"));
 
 		while (true) {
@@ -38,6 +40,7 @@ public class Coordinator {
 			System.out.println("[SERVER] Waiting for client connection...");
 			Socket member = listener.accept();
 			System.out.println("[SERVER] Connected to client.");
+
 
 			//Create the new thread - Runnable implemented by MemberHandler
 			//TODO: Pass MulticastSocket to Handler
@@ -60,6 +63,6 @@ public class Coordinator {
 				x.send(message);
 			}
 		}
-	}
+	}//Send
 
 }

@@ -1,12 +1,4 @@
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.time.*;
 import java.util.ArrayList;
@@ -21,6 +13,9 @@ public class GroupMember {
 	public static int GROUP_MEMBER_ID;
 	public static String LOG_FILE;
 
+	public static Socket socket;
+	public static DataOutputStream dOut;
+	public static DataInputStream dIn;
 
 	public static ArrayList<MemberHandler> members = new ArrayList<>();
 
@@ -42,10 +37,9 @@ public class GroupMember {
 		COORDINATOR_SERVER_PORT = Integer.parseInt(configInfo.get(2).split(" ")[1]);
 
 		//Specific Socket for sending to the Coordinator
-		Socket socket = new Socket(COORDINATOR_SERVER_IP, COORDINATOR_SERVER_PORT);
+		socket = new Socket(COORDINATOR_SERVER_IP, COORDINATOR_SERVER_PORT);
 		BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
-
 
 		//Fixed size pool of threads - 4
 		MemberHandler memberThread = new MemberHandler(socket, LOG_FILE); //placeholder info - remove later
@@ -62,6 +56,15 @@ public class GroupMember {
 			//out.println(command);
 			switch(command.split(" ")[0]) {
 			case "msend":
+				out.print(command);
+
+				//blocking call that waits for coordinator acknowledgment
+				while(true){
+					if(input.readLine().equals("ACK")){
+						break;
+					}
+				}//while
+				break;
 			case "reconnect":
 			case "disconnect":
 				out.println(command);
@@ -69,16 +72,17 @@ public class GroupMember {
 				break;
 			case "register":
 				//Execute Thread B before sending to the coordinator
+				out.println(command + " " + GROUP_MEMBER_ID);
+
 				members.add(memberThread);
 				pool.execute(memberThread);	
-				
+
 				//assemble datagram
 				//send it to the coordinator
-				out.println(command);
-				
 				break;
 			case "deregister":
 				//TODO: Send Message to the Coordinator
+				out.println(command);
 				
 				//Kill the Thread
 				members.remove(0);

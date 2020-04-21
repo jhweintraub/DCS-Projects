@@ -1,9 +1,6 @@
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 
 public class CoordinatorHandler implements Runnable{
@@ -19,11 +16,9 @@ public class CoordinatorHandler implements Runnable{
 	private int Port;
 	private int ID;
 	private String IPAddr;
-	private boolean isConnected = false;
+	public boolean isConnected = false;
 	
 
-
-	
 	
 	//TODO: Temporal Information about Disconnection Time
 	
@@ -34,6 +29,7 @@ public class CoordinatorHandler implements Runnable{
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintWriter(client.getOutputStream(), true);
 		this.dOut = new DataOutputStream(client.getOutputStream());
+		messages = new Message[100];
 	}
 
 	@Override
@@ -46,8 +42,15 @@ public class CoordinatorHandler implements Runnable{
 				switch (command) {
 				case "msend":
 					String message = request.substring(request.indexOf(" ")); //Take everything after msend command as msg
-					Coordinator.Send(message); //Get the 
-					//Log the Message to File
+					System.out.println(message);
+
+					Message newMess = new Message(message, Coordinator.TIME_THRESHOLD);
+					messages[getLastIndex()] = newMess;
+
+					//to clear participant blocking call
+					out.println("ACK");
+
+					Coordinator.Send(message);
 					break;
 				case "disconnect":
 					this.isConnected = false;
@@ -59,13 +62,29 @@ public class CoordinatorHandler implements Runnable{
 					break;
 				case "register":
 					//make new Participant and add to list of Participants in Coordinator
-					System.out.println("this is a test of emergency prepardeness");
-					this.isConnected = true;
+					CoordinatorHandler newHandler = new CoordinatorHandler(new Socket(IPAddr, Port));
+					Coordinator.participants.add(newHandler);
+
+					newHandler.Port = Integer.parseInt(request.split(" ")[1]);
+					try(final DatagramSocket socket = new DatagramSocket()){
+						socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+						newHandler.IPAddr = socket.getLocalAddress().getHostAddress();
+					}
+					newHandler.ID = Integer.parseInt(request.split(" ")[2]);
+
+					Coordinator.pool.execute(newHandler);
+					newHandler.isConnected = true;
+
+					System.out.println("Member " + newHandler.ID + " has been registered.");
 					break;
 				case "deregister":
 					out.println(request);
 					//Exit the Thread and kill it - this should take it out of the pool
-					break;
+					Coordinator.participants.remove(this);
+					Coordinator.participants.trimToSize();
+					Thread.currentThread().interrupt();
+					System.out.println("Member " + this.ID + " has been deregistered.");
+					return;
 				}// switch
 			} // while
 		} catch (IOException exception) {
@@ -87,10 +106,18 @@ public class CoordinatorHandler implements Runnable{
 	public boolean getisConnected() {
 		return isConnected;
 	}
-	
+
 	public void send(String message) {
-		//Send the message through the socket
 		out.println(message);
+	}
+
+	public int getLastIndex(){
+		int i;
+		for(i = 0; i < messages.length; i++)
+			if(messages[i] == null){
+			  break;
+			}
+		return i;
 	}
 
 }
