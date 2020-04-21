@@ -12,10 +12,12 @@ public class GroupMember {
 	public static int COORDINATOR_SERVER_PORT;
 	public static int GROUP_MEMBER_ID;
 	public static String LOG_FILE;
+	private static boolean isRegistered = false;
 
 	public static Socket socket;
 	public static DataOutputStream dOut;
 	public static DataInputStream dIn;
+
 
 	public static ArrayList<MemberHandler> members = new ArrayList<>();
 
@@ -72,7 +74,8 @@ public class GroupMember {
 				break;
 			case "register":
 				//Execute Thread B before sending to the coordinator
-				out.println(command + " " + GROUP_MEMBER_ID);
+
+				out.println(command + " " + GROUP_MEMBER_ID + " " + COORDINATOR_SERVER_IP);
 
 				members.add(memberThread);
 				pool.execute(memberThread);	

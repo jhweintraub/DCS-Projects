@@ -18,9 +18,7 @@ public class MemberHandler implements Runnable{
 		try {
 			this.socket = socket;
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			InputStream is = socket.getInputStream();
 			out = new PrintWriter(socket.getOutputStream(), true);
-			OutputStream os = socket.getOutputStream();
 			this.dOut = new DataOutputStream(socket.getOutputStream());
 		} catch (Exception e) {
 			e.printStackTrace();

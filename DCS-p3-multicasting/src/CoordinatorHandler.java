@@ -13,9 +13,9 @@ public class CoordinatorHandler implements Runnable{
 	private Message[] messages;
 	
 	//SendSocket Information
-	private int Port;
-	private int ID;
-	private String IPAddr;
+	public int Port;
+	public int ID;
+	public String IPAddr;
 	public boolean isConnected = false;
 	
 
@@ -60,23 +60,20 @@ public class CoordinatorHandler implements Runnable{
 					//Get List of Messages from array
 					//Send it back through the socket as one. Will be Parsed on the client side
 					break;
-				case "register":
+				/*case "register":
 					//make new Participant and add to list of Participants in Coordinator
 					CoordinatorHandler newHandler = new CoordinatorHandler(new Socket(IPAddr, Port));
 					Coordinator.participants.add(newHandler);
 
 					newHandler.Port = Integer.parseInt(request.split(" ")[1]);
-					try(final DatagramSocket socket = new DatagramSocket()){
-						socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-						newHandler.IPAddr = socket.getLocalAddress().getHostAddress();
-					}
+
 					newHandler.ID = Integer.parseInt(request.split(" ")[2]);
 
 					Coordinator.pool.execute(newHandler);
 					newHandler.isConnected = true;
 
 					System.out.println("Member " + newHandler.ID + " has been registered.");
-					break;
+					break;*/
 				case "deregister":
 					out.println(request);
 					//Exit the Thread and kill it - this should take it out of the pool
