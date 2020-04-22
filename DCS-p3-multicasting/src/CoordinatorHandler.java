@@ -16,7 +16,7 @@ public class CoordinatorHandler implements Runnable{
 	public int Port;
 	public int ID;
 	public String IPAddr;
-	public boolean isConnected = false;
+	public boolean isConnected = true;
 	
 
 	
@@ -42,13 +42,22 @@ public class CoordinatorHandler implements Runnable{
 				switch (command) {
 				case "msend":
 					String message = request.substring(request.indexOf(" ")); //Take everything after msend command as msg
+					
+					message = "------\n"
+							+ "Sender ID: " + this.ID + '\n'
+							+ "Time: " + '\n'
+							+ "Message: " + message + '\n'
+							+ "------\n";
+					
 					System.out.println(message);
+							
 
 					Message newMess = new Message(message, Coordinator.TIME_THRESHOLD);
 					messages[getLastIndex()] = newMess;
 
 					//to clear participant blocking call
 					out.println("ACK");
+				
 
 					Coordinator.Send(message);
 					break;

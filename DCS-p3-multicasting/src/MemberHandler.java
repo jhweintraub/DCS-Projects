@@ -32,25 +32,33 @@ public class MemberHandler implements Runnable{
 		// TODO Auto-generated method stub
 		try {
 			while (true) {
+				if (Thread.interrupted()) return;
+	
 				String message = in.readLine();
-				System.out.println(message);
-
-				try{
-					FileWriter myWriter = new FileWriter(logFile, true);
-					myWriter.write("\n" + message); //Log Message
-					myWriter.close();
-				}catch(IOException e){
-					e.printStackTrace();
-				}//write message to logfile
+				
+				if (message == null) continue;
+				
+				else if (message.equals("ACK")) {
+					GroupMember.WAITING_FOR_ACK = false;
+					continue;
+				}
+				
+				else {
+//					System.out.println(message);
+					try{
+						FileWriter myWriter = new FileWriter(logFile, true);
+						myWriter.write("\n" + message); //Log Message
+						myWriter.close();
+					}catch(IOException e){
+						e.printStackTrace();
+					}//write message to logfile
+				}//else
 				
 			}//while()
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-	}//MemberHandler
-
-
-
-}
+		}//catch
+	}//run()
+}//MemberHandler()

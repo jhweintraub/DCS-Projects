@@ -13,6 +13,8 @@ public class GroupMember {
 	public static int GROUP_MEMBER_ID;
 	public static String LOG_FILE;
 	private static boolean isRegistered = false;
+	private static boolean isConnected = false;
+	protected static boolean WAITING_FOR_ACK = false;
 
 	public static Socket socket;
 	public static DataOutputStream dOut;
@@ -58,38 +60,51 @@ public class GroupMember {
 			//out.println(command);
 			switch(command.split(" ")[0]) {
 			case "msend":
-				out.print(command);
+				if (!isConnected) {
+					System.out.println("Error. You Are Not Connected. Please Reconnect and Try Again");
+					continue;
+				}
+				
+				else if (!isRegistered) {
+					System.out.println("Error. You Are Not Registed. Please Register and Try Again");
+					continue;
+				}
+				
+				out.println(command);
+				WAITING_FOR_ACK = true;
 
 				//blocking call that waits for coordinator acknowledgment
-				while(true){
-					if(input.readLine().equals("ACK")){
-						break;
-					}
-				}//while
+				while(WAITING_FOR_ACK);
+				
 				break;
-			case "reconnect":
+			case "reconnect":	
+				isConnected = true;
+				out.println(command);
+				break;
 			case "disconnect":
+				isConnected = false;
 				out.println(command);
 				//Send message to coordinator
 				break;
 			case "register":
 				//Execute Thread B before sending to the coordinator
-
-				out.println(command + " " + GROUP_MEMBER_ID + " " + COORDINATOR_SERVER_IP);
-
 				members.add(memberThread);
 				pool.execute(memberThread);	
+				isRegistered = true;
+				isConnected = true;
+				out.println(command + " " + GROUP_MEMBER_ID + " " + COORDINATOR_SERVER_IP);
+			
 
 				//assemble datagram
 				//send it to the coordinator
 				break;
-			case "deregister":
-				//TODO: Send Message to the Coordinator
-				out.println(command);
-				
+			case "deregister":				
 				//Kill the Thread
 				members.remove(0);
 				pool.shutdownNow(); //Kill the pool - we can Shut down the entire pool cause there's only one other thread
+				
+				out.println(command);
+
 				break;
 			default:
 				System.out.println("Invalid Choice. Please Try Again");
