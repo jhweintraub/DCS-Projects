@@ -38,6 +38,7 @@ public class GroupMember {
 		GROUP_MEMBER_ID = Integer.parseInt(configInfo.get(0)); 
 		LOG_FILE = configInfo.get(1);
 		COORDINATOR_SERVER_IP = configInfo.get(2).split(" ")[0];
+		System.out.println("Server IP " + COORDINATOR_SERVER_IP);
 		COORDINATOR_SERVER_PORT = Integer.parseInt(configInfo.get(2).split(" ")[1]);
 
 		//Specific Socket for sending to the Coordinator
@@ -92,7 +93,7 @@ public class GroupMember {
 				pool.execute(memberThread);	
 				isRegistered = true;
 				isConnected = true;
-				out.println(command + " " + GROUP_MEMBER_ID + " " + COORDINATOR_SERVER_IP);
+				out.println(command + " " + GROUP_MEMBER_ID + " " + COORDINATOR_SERVER_IP + " " + COORDINATOR_SERVER_PORT );
 			
 
 				//assemble datagram

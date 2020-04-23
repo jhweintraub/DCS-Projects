@@ -16,7 +16,7 @@ public class Coordinator {
 	
 	//Fixed size pool of threads - 4
 	public static ExecutorService pool = Executors.newFixedThreadPool(15);
-
+	public static ArrayList<Message> msgList = new ArrayList<Message>() ;
 	public static void main(String[] args) throws IOException {
 		
 		//Parse Config File Info
@@ -44,9 +44,10 @@ public class Coordinator {
 			if(input.contains("register")){
 				CoordinatorHandler memberThread = new CoordinatorHandler(member);
 
-				memberThread.Port = Integer.parseInt(input.split(" ")[1]);
-				memberThread.ID = Integer.parseInt(input.split(" ")[2]);
-				memberThread.IPAddr = input.split(" ")[3];
+				memberThread.Port = Integer.parseInt(input.split(" ")[3]);
+				memberThread.ID = Integer.parseInt(input.split(" ")[1]);
+				System.out.println("IP ADDRESS: " + input.split(" ")[2]);
+				memberThread.IPAddr = input.split(" ")[2];
 
 				participants.add(memberThread);
 
@@ -60,6 +61,8 @@ public class Coordinator {
 	}
 	
 	public static void Send(String message) {
+		Message msg = new Message(message);
+		msgList.add(msg);
 		for (CoordinatorHandler x : participants) {
 			System.out.println(x.getisConnected());
 			if (x.getisConnected()) {

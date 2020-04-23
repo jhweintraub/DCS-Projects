@@ -1,20 +1,20 @@
 import java.time.*;
-
+import java.util.Date;
 public class Message {
 	
 	private String message;
-	private Long time;
+	private Date time;
 	
-	public Message(String message, Long time) {
+	public Message(String message) {
 		this.message = message;
-		this.time = time;
+		this.time   = new Date();
 	}
 	
 	public String getMessage() {
 		return message;
 	}
 	
-	public Long getTime() {
+	public Date getDateTime() {
 		return time;
 	}
 

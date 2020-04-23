@@ -2,7 +2,7 @@ import java.io.*;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
-
+import java.util.Date;
 public class CoordinatorHandler implements Runnable{
 
 	//ServerSocket Information
@@ -45,15 +45,13 @@ public class CoordinatorHandler implements Runnable{
 					
 					message = "------\n"
 							+ "Sender ID: " + this.ID + '\n'
-							+ "Time: " + '\n'
+							+ "Time: " + new Date().toString() + '\n'
 							+ "Message: " + message + '\n'
 							+ "------\n";
 					
-					System.out.println(message);
+				//	System.out.println(message);
 							
 
-					Message newMess = new Message(message, Coordinator.TIME_THRESHOLD);
-					messages[getLastIndex()] = newMess;
 
 					//to clear participant blocking call
 					out.println("ACK");
@@ -66,6 +64,16 @@ public class CoordinatorHandler implements Runnable{
 					break;
 				case "reconnect":
 					this.isConnected = true;
+					Date now = new Date();
+					System.out.println("MsgListSize: " + Coordinator.msgList.size());
+					for(int i = 0; i < Coordinator.msgList.size(); i++){
+						//See how many seconds 
+						long seconds = (Coordinator.msgList.get(i).getDateTime().getTime() - now.getTime())/1000;
+						if (seconds < Coordinator.TIME_THRESHOLD ){
+							this.send(Coordinator.msgList.get(i).getMessage());
+						}
+					}
+
 					//Get List of Messages from array
 					//Send it back through the socket as one. Will be Parsed on the client side
 					break;
