@@ -65,7 +65,7 @@ public class CoordinatorHandler implements Runnable{
 				case "reconnect":
 					this.isConnected = true;
 					Date now = new Date();
-					System.out.println("MsgListSize: " + Coordinator.msgList.size());
+					
 					for(int i = 0; i < Coordinator.msgList.size(); i++){
 						//See how many seconds 
 						long seconds = (Coordinator.msgList.get(i).getDateTime().getTime() - now.getTime())/1000;

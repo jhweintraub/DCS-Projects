@@ -1,7 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-
+import java.util.ArrayList;
 public class MemberHandler implements Runnable{
 
 	public File logFile;
@@ -10,7 +10,7 @@ public class MemberHandler implements Runnable{
 	private PrintWriter out;
 	private DataOutputStream dOut;
 	private DataInputStream dIn;
-
+	public static ArrayList<String> msgList = new ArrayList<String>() ;
 
 	//TODO: Connect the MulticastSocket
 
@@ -25,6 +25,7 @@ public class MemberHandler implements Runnable{
 		}
 
 		logFile = new File(log);
+	
 	}
 
 	@Override
@@ -46,9 +47,19 @@ public class MemberHandler implements Runnable{
 				else {
 //					System.out.println(message);
 					try{
+						boolean keepGoing = true;
+						for(int i = 0; i<msgList.size(); i++){
+							if(msgList.get(i).equals(message)){
+								keepGoing = false;
+							}
+						}
+						//Dont write if we have already done it
+						if(keepGoing){
 						FileWriter myWriter = new FileWriter(logFile, true);
 						myWriter.write("\n" + message); //Log Message
 						myWriter.close();
+						msgList.add(message);
+						}
 					}catch(IOException e){
 						e.printStackTrace();
 					}//write message to logfile
