@@ -2,7 +2,7 @@ import java.io.*;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
-
+import java.util.Date;
 public class CoordinatorHandler implements Runnable{
 
 	//ServerSocket Information
@@ -16,12 +16,7 @@ public class CoordinatorHandler implements Runnable{
 	public int Port;
 	public int ID;
 	public String IPAddr;
-	public boolean isConnected = true;
-	
-
-	
-	//TODO: Temporal Information about Disconnection Time
-	
+	public boolean isConnected = true;	
 
 	public CoordinatorHandler(Socket clientSocket) throws IOException {
 		//ServerSocket Info
@@ -45,44 +40,39 @@ public class CoordinatorHandler implements Runnable{
 					
 					message = "------\n"
 							+ "Sender ID: " + this.ID + '\n'
-							+ "Time: " + '\n'
+							+ "Time: " + new Date().toString() + '\n'
 							+ "Message: " + message + '\n'
-							+ "------\n";
+							+ "------";
 					
-					System.out.println(message);
+					//	System.out.println(message);
 							
+					Coordinator.Send(message);
 
-					Message newMess = new Message(message, Coordinator.TIME_THRESHOLD);
-					messages[getLastIndex()] = newMess;
 
 					//to clear participant blocking call
 					out.println("ACK");
-				
-
-					Coordinator.Send(message);
 					break;
 				case "disconnect":
 					this.isConnected = false;
 					break;
 				case "reconnect":
 					this.isConnected = true;
+					Date now = new Date();
+					
+					for(int i = 0; i < Coordinator.msgList.size(); i++){
+						//See how many seconds 
+						long seconds = (now.getTime() - Coordinator.msgList.get(i).getDateTime().getTime())/1000;
+//						System.out.println("Time Elapsed: " + seconds);
+//						System.out.println("Threshold: " + Coordinator.TIME_THRESHOLD);
+						if (seconds < Coordinator.TIME_THRESHOLD ){
+							this.send(Coordinator.msgList.get(i).getMessage());
+						}
+						else continue;
+					}
+
 					//Get List of Messages from array
 					//Send it back through the socket as one. Will be Parsed on the client side
 					break;
-				/*case "register":
-					//make new Participant and add to list of Participants in Coordinator
-					CoordinatorHandler newHandler = new CoordinatorHandler(new Socket(IPAddr, Port));
-					Coordinator.participants.add(newHandler);
-
-					newHandler.Port = Integer.parseInt(request.split(" ")[1]);
-
-					newHandler.ID = Integer.parseInt(request.split(" ")[2]);
-
-					Coordinator.pool.execute(newHandler);
-					newHandler.isConnected = true;
-
-					System.out.println("Member " + newHandler.ID + " has been registered.");
-					break;*/
 				case "deregister":
 					out.println(request);
 					//Exit the Thread and kill it - this should take it out of the pool

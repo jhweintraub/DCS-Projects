@@ -16,7 +16,7 @@ public class Coordinator {
 	
 	//Fixed size pool of threads - 4
 	public static ExecutorService pool = Executors.newFixedThreadPool(15);
-
+	public static ArrayList<Message> msgList = new ArrayList<Message>() ;
 	public static void main(String[] args) throws IOException {
 		
 		//Parse Config File Info
@@ -26,7 +26,7 @@ public class Coordinator {
 		while (myReader.hasNextLine()) configInfo.add(myReader.nextLine());
 		myReader.close();
 		PORT = Integer.parseInt(configInfo.get(0));
-		TIME_THRESHOLD = Long.parseLong(configInfo.get(1));
+		TIME_THRESHOLD = Integer.parseInt(configInfo.get(1));
 
 		
 		listener = new ServerSocket(PORT);
@@ -40,13 +40,13 @@ public class Coordinator {
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(member.getInputStream()));
 			String input = in.readLine();
-
 			if(input.contains("register")){
 				CoordinatorHandler memberThread = new CoordinatorHandler(member);
 
 				memberThread.Port = Integer.parseInt(input.split(" ")[1]);
 				memberThread.ID = Integer.parseInt(input.split(" ")[2]);
 				memberThread.IPAddr = input.split(" ")[3];
+				System.out.println("IP ADDRESS: " + input.split(" ")[3]);
 
 				participants.add(memberThread);
 
@@ -60,12 +60,14 @@ public class Coordinator {
 	}
 	
 	public static void Send(String message) {
+		Message msg = new Message(message);
+		msgList.add(msg);
 		for (CoordinatorHandler x : participants) {
-			System.out.println(x.getisConnected());
+			//System.out.println(x.getisConnected());
 			if (x.getisConnected()) {
 				x.send(message);
-			}
-		}
+			}//if
+		}//for
 	}//Send
 
-}
+}//Coordinator
